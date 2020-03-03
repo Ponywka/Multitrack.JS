@@ -1,0 +1,151 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "localId": 1,
+            "titleId": 49,
+            "descriptionId": 50,
+            "categoryId": 1,
+            "thumbnail": "//base.bronyru.info/FiM/i/1a.jpg",
+            "path": "//base.bronyru.info/FiM/media/s1/e1/",
+            "category": {
+                "id": 1,
+                "name": "s1",
+                "titleId": 1,
+                "subtitleId": 2,
+                "categoryId": 11,
+                "thumbnail": "/FiM/i/1.jp"
+            },
+            "title": {
+                "id": 49,
+                "rus": "Магия Дружбы, часть 1",
+                "eng": "Friendship is Magic, part 1"
+            },
+            "description": {
+                "id": 50,
+                "rus": "Давным-давно Эквестрией, где вместе жили земные пони, пегасы и единороги, правили две сестры. Старшая сестра управляла солнцем, а младшая — луной. Однажды младшая сестра отказалась уступить место старшей, чуть не погрузив мир в вечный мрак. Тогда старшей сестре пришлось применить магию шести Элементов Гармонии, чтобы изгнать её на луну. С тех пор старшая сестра стала управлять и солнцем, и луной. Но спустя тысячу лет младшая сестра вернулась в праздник летнего солнцестояния, а старшая исчезла. Теперь ночь будет длиться вечно…",
+                "eng": ""
+            },
+            "songs": [],
+            "releases": [],
+            "videos": [
+                {
+                    "id": 1,
+                    "quality": "1080",
+                    "priority": 0,
+                    "episodeId": 1
+                },
+                {
+                    "id": 2,
+                    "quality": "720",
+                    "priority": 1,
+                    "episodeId": 1
+                },
+                {
+                    "id": 3,
+                    "quality": "480",
+                    "priority": 2,
+                    "episodeId": 1
+                },
+                {
+                    "id": 4,
+                    "quality": "360",
+                    "priority": 3,
+                    "episodeId": 1
+                },
+                {
+                    "id": 5,
+                    "quality": "144",
+                    "priority": 4,
+                    "episodeId": 1
+                },
+                {
+                    "id": 6,
+                    "quality": "240",
+                    "priority": 5,
+                    "episodeId": 1
+                }
+            ],
+            "subtitles": [
+                {
+                    "priority": 0,
+                    "name": {
+                        "name": "RUS anon2anon",
+                        "codeName": "a2a-rus"
+                    }
+                },
+                {
+                    "priority": 1,
+                    "name": {
+                        "name": "RUS Grue",
+                        "codeName": "gru-rus"
+                    }
+                },
+                {
+                    "priority": 2,
+                    "name": {
+                        "name": "ENG anon2anon",
+                        "codeName": "a2a-eng"
+                    }
+                }
+            ],
+            "dubs": [
+                {
+                    "priority": 4,
+                    "name": {
+                        "name": "Doublezett Studio (Agent DieGo)",
+                        "codeName": "die"
+                    }
+                },
+                {
+                    "priority": 5,
+                    "name": {
+                        "name": "Оригинал",
+                        "codeName": "has"
+                    }
+                },
+                {
+                    "priority": 0,
+                    "name": {
+                        "name": "Карусель (ReDub)",
+                        "codeName": "red"
+                    }
+                },
+                {
+                    "priority": 5,
+                    "name": {
+                        "name": "Украинская (ПлюсПлюс, студия \"Мастер Видео\")",
+                        "codeName": "mav"
+                    }
+                },
+                {
+                    "priority": 1,
+                    "name": {
+                        "name": "Gala Voices",
+                        "codeName": "gal"
+                    }
+                },
+                {
+                    "priority": 3,
+                    "name": {
+                        "name": "KidZoneTV",
+                        "codeName": "est"
+                    }
+                },
+                {
+                    "priority": 2,
+                    "name": {
+                        "name": "CrySHL (Крайшл)",
+                        "codeName": "cry"
+                    }
+                }
+            ],
+            "writers": [
+                {
+                    "id": 1,
+                    "name": "Lauren Faust"
+                }
+            ]
+        }
+    ]
+}

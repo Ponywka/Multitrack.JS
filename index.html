@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My first Vue app</title>
+    <script src="https://unpkg.com/vue"></script>
+    <link rel="stylesheet/less" type="text/css" href="styles.less" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/3.9.0/less.min.js"></script>
+</head>
+
+<body>
+    <div id="bronyru-videoplayer-js" :isPlaying="isPlaying">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <video ref="videoel" id="video" :src="video"></video>
+        <audio ref="audioel" id="audio" :src="audio"></audio>
+        <div
+            style="background-color: rgba(0,0,0,.5); position: absolute; top: 10px; left: 10px; color: white; padding: 10px;">
+            Time: {{ secondsToTime(currentTime) }} | {{ secondsToTime(duration) }}<br>
+            Playing: {{ isPlaying}} <br>
+            isWaitingVideo: {{ isWaitingVideo }}<br>
+            isWaitingAudio: {{ isWaitingAudio }}<br>
+            CurrentPos: {{ currentTime }}
+        </div>
+        <div class="bronyru-videoplayer-js-videooverlay">
+            <div class="bronyru-videoplayer-js-bottom">
+                <div @click="progressBarClick" id="bronyru-videoplayer-js-progressbar">
+                    <canvas ref="loadbar" id="bronyru-videoplayer-js-loadbar" height="1"
+                        style="width: 100%; height: 3px"></canvas>
+                    <div ref="playbar" id="bronyru-videoplayer-js-playbar"
+                        :style="'width: '+ (currentTime / duration) * 100 +'%'">
+                    </div>
+                </div>
+                <button class="bronyru-videoplayer-js-btn bronyru-videoplayer-js-btn-long" @click="pause"
+                    v-if="isPlaying"><i class="material-icons">pause</i></button>
+                <button class="bronyru-videoplayer-js-btn bronyru-videoplayer-js-btn-long" @click="play" v-else><i
+                        class="material-icons">play_arrow</i></button>
+                <button class="bronyru-videoplayer-js-btn" @click="randomplace"><i
+                        class="material-icons">shuffle</i></button>
+            </div>
+        </div>
+        <table border="1">
+            <tr>
+                <th>Time</th>
+                <th>Event</th>
+            </tr>
+            <tr v-for="event in events">
+                <td>{{event.time}}</td>
+                <td>{{event.message}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        let app = new Vue({
+            el: `#bronyru-videoplayer-js`,
+            data: {
+                someurl: `s1e1.json`,
+                video: "//base.bronyru.info/FiM/media/s1/e1/1080.mp4",
+                audio: "//base.bronyru.info/FiM/media/s1/e1/has.mp4",
+                currentTime: 0,
+                newTime: 0,
+                duration: 0,
+                isPlaying: false,
+                isWaitingVideo: false,
+                isWaitingAudio: false,
+                loaded: 0,
+                canvas: null,
+                events: []
+            },
+            watch: {
+                isPlaying: function (val) {
+                    this.log(`isPlaying changed to ${val}`);
+                    if (val) {
+                        if (!this.isWaitingAudio && !this.isWaitingVideo) {
+                            this.$refs.audioel.currentTime = this.$refs.videoel.currentTime;
+                            this.$refs.videoel.play()
+                            this.$refs.audioel.play()
+                        }
+                    } else {
+                        this.$refs.videoel.pause()
+                        this.$refs.audioel.pause()
+                    }
+                },
+                isWaitingVideo: function (val) {
+                    this.log(`isWaitingVideo changed to ${val}`);
+                    if (this.isPlaying && !this.isWaitingAudio && !val) {
+                        this.$refs.audioel.play()
+                    }
+                    if (this.isPlaying && !this.isWaitingAudio && val) {
+                        this.$refs.audioel.pause()
+                    }
+                },
+                isWaitingAudio: function (val) {
+                    this.log(`isWaitingAudio changed to ${val}`);
+                    if (this.isPlaying && !this.isWaitingVideo && !val) {
+                        this.$refs.videoel.play()
+                    }
+                    if (this.isPlaying && !this.isWaitingVideo && val) {
+                        this.$refs.videoel.pause()
+                    }
+                },
+                newTime: function (val) {
+                    this.log(`newTime changed to ${val}`);
+                    this.$refs.videoel.currentTime = val;
+                    this.$refs.audioel.currentTime = val;
+                }
+            },
+            methods: {
+                log(message){
+                    this.events.push({
+                        time: (new Date).getTime(),
+                        message: message
+                    })
+                },
+                play() {
+                    this.isPlaying = true;
+                },
+                pause() {
+                    this.isPlaying = false;
+                },
+                randomplace() {
+                    this.newTime = Math.random() * this.$refs.videoel.duration
+                },
+                progressBarClick(event) {
+                    console.log(event);
+                    console.log(`${event.layerX} ${event.target.parentElement.clientWidth}`)
+
+                    this.newTime = ((event.layerX - event.target.offsetLeft) / event.target.parentElement.clientWidth) * this.duration;
+                },
+                secondsToTime(sec) {
+                    sec = Math.floor(sec);
+                    let seconds = sec % 60;
+                    let minutes = (sec - seconds) / 60;
+                    let hours = (sec - minutes * 60 - seconds) / 3600;
+                    return hours > 0 ?
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` :
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            },
+            mounted() {
+                let player = this.$refs;
+                this.canvas = player.loadbar.getContext('2d');
+                // Update video duration
+                player.videoel.onloadedmetadata = () => {
+                    this.duration = player.videoel.duration;
+                }
+
+                // Sync video with audio
+                player.videoel.onwaiting = () => {
+                    this.isWaitingVideo = true;
+                }
+                player.videoel.oncanplay = () => {
+                    this.isWaitingVideo = false;
+                }
+
+                // Sync audio with video
+                player.audioel.onwaiting = () => {
+                    this.isWaitingAudio = true;
+                }
+                player.audioel.oncanplay = () => {
+                    this.isWaitingAudio = false;
+                }
+
+                // Sync time
+                player.videoel.ontimeupdate = () => {
+                    this.currentTime = player.videoel.currentTime;
+                    this.loaded = player.videoel.buffered.end(player.videoel.buffered.length - 1)
+                }
+
+                // Sync pause
+                player.audioel.onpause = () => {
+                    this.log(`>>>>> Audio pause`);
+                    /*if (!(this.isPlaying && !this.isWaitingAudio && this.isWaitingVideo)) {
+                        this.isPlaying = false;
+                    }*/
+                }
+
+                player.audioel.onplaying = () => {
+                    this.log(`>>>>> Audio play`);
+                    /*if (!(this.isPlaying && !this.isWaitingVideo && !this.isWaitingVideo)) {
+                        this.isPlaying = true;
+                    }*/
+                }
+
+                // Progress bar
+                player.videoel.onprogress = () => {
+                    player.loadbar.width = player.loadbar.clientWidth;
+                    this.canvas.fillStyle = 'white';
+                    this.canvas.clearRect(0, 0, player.loadbar.width, 1);
+                    for (let i = 0; i < player.videoel.buffered.length; i++) {
+                        var startX = player.videoel.buffered.start(i) * player.loadbar.width / this.duration;
+                        var endX = player.videoel.buffered.end(i) * player.loadbar.width / this.duration;
+                        var width = endX - startX;
+
+                        this.canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
