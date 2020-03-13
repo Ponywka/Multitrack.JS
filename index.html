@@ -19,7 +19,8 @@
             Playing: {{ isPlaying}} <br>
             isWaitingVideo: {{ isWaitingVideo }}<br>
             isWaitingAudio: {{ isWaitingAudio }}<br>
-            CurrentPos: {{ currentTime }}
+            CurrentPos: {{ currentTime }}<br>
+            Ignored: {{ ignoringActionVideo }} | {{ ignoringActionAudio }}
         </div>
         <div class="bronyru-videoplayer-js-videooverlay">
             <div class="bronyru-videoplayer-js-bottom">
@@ -63,6 +64,8 @@
                 isPlaying: false,
                 isWaitingVideo: false,
                 isWaitingAudio: false,
+                ignoringActionVideo: false,
+                ignoringActionAudio: false,
                 loaded: 0,
                 canvas: null,
                 events: []
@@ -84,18 +87,22 @@
                 isWaitingVideo: function (val) {
                     this.log(`isWaitingVideo changed to ${val}`);
                     if (this.isPlaying && !this.isWaitingAudio && !val) {
+                        this.ignoringActionAudio = true;
                         this.$refs.audioel.play()
                     }
                     if (this.isPlaying && !this.isWaitingAudio && val) {
+                        this.ignoringActionAudio = true;
                         this.$refs.audioel.pause()
                     }
                 },
                 isWaitingAudio: function (val) {
                     this.log(`isWaitingAudio changed to ${val}`);
                     if (this.isPlaying && !this.isWaitingVideo && !val) {
+                        this.ignoringActionVideo = true;
                         this.$refs.videoel.play()
                     }
                     if (this.isPlaying && !this.isWaitingVideo && val) {
+                        this.ignoringActionVideo = true;
                         this.$refs.videoel.pause()
                     }
                 },
@@ -167,21 +174,46 @@
                     this.loaded = player.videoel.buffered.end(player.videoel.buffered.length - 1)
                 }
 
-                // Sync pause
+                // Sync pause audio
                 player.audioel.onpause = () => {
-                    this.log(`>>>>> Audio pause`);
-                    /*if (!(this.isPlaying && !this.isWaitingAudio && this.isWaitingVideo)) {
+                    this.log(`>>>>> Audio pause ${this.ignoringActionAudio}`);
+                    if(!this.ignoringActionAudio){
                         this.isPlaying = false;
-                    }*/
+                    }else{
+                        this.ignoringActionAudio = false;
+                    }
                 }
 
+                // Sync playing audio
                 player.audioel.onplaying = () => {
                     this.log(`>>>>> Audio play`);
-                    /*if (!(this.isPlaying && !this.isWaitingVideo && !this.isWaitingVideo)) {
+                    if(!this.ignoringActionAudio){
                         this.isPlaying = true;
-                    }*/
+                    }else{
+                        this.ignoringActionAudio = false;
+                    }
                 }
 
+                // Sync pause video
+                player.videoel.onpause = () => {
+                    this.log(`>>>>> Video pause ${this.ignoringActionVideo}`);
+                    if(!this.ignoringActionVideo){
+                        this.isPlaying = false;
+                    }else{
+                        this.ignoringActionVideo = false;
+                    }
+                }
+
+                // Sync playing video
+                player.videoel.onplaying = () => {
+                    this.log(`>>>>> Video play`);
+                    if(!this.ignoringActionVideo){
+                        this.isPlaying = true;
+                    }else{
+                        this.ignoringActionVideo = false;
+                    }
+                }
+                
                 // Progress bar
                 player.videoel.onprogress = () => {
                     player.loadbar.width = player.loadbar.clientWidth;
