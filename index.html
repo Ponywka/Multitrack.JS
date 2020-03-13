@@ -37,6 +37,10 @@
                         class="material-icons">play_arrow</i></button>
                 <button class="bronyru-videoplayer-js-btn" @click="randomplace"><i
                         class="material-icons">shuffle</i></button>
+                <button class="bronyru-videoplayer-js-btn" @click="pipToggle" v-if="pipEnabled">
+                    <i v-if="piped" class="material-icons">picture_in_picture_alt</i>
+                    <i v-else class="material-icons">picture_in_picture</i>
+                </button>
             </div>
         </div>
         <table border="1">
@@ -52,6 +56,8 @@
     </div>
 
     <script>
+        let pageFocused = true;
+
         let app = new Vue({
             el: `#bronyru-videoplayer-js`,
             data: {
@@ -68,42 +74,51 @@
                 ignoringActionAudio: false,
                 loaded: 0,
                 canvas: null,
+                pipEnabled: ('pictureInPictureEnabled' in document),
+                piped: false,
                 events: []
             },
             watch: {
                 isPlaying: function (val) {
                     this.log(`isPlaying changed to ${val}`);
                     if (val) {
-                        if (!this.isWaitingAudio && !this.isWaitingVideo) {
-                            this.$refs.audioel.currentTime = this.$refs.videoel.currentTime;
+                        if (this.$refs.videoel.paused) {
+                            this.ignoringActionVideo = true;
                             this.$refs.videoel.play()
+                        }
+                        if (this.$refs.audioel.paused) {
+                            this.ignoringActionAudio = true;
                             this.$refs.audioel.play()
                         }
+                        if (Math.abs(this.$refs.videoel.currentTime - this.$refs.audioel.currentTime) > 0.2)
+                            this.$refs.videoel.currentTime = this.$refs.audioel.currentTime;
                     } else {
-                        this.$refs.videoel.pause()
-                        this.$refs.audioel.pause()
+                        if (!this.$refs.videoel.paused) {
+                            this.ignoringActionVideo = true;
+                            this.$refs.videoel.pause()
+                        }
+                        if (!this.$refs.audioel.paused) {
+                            this.ignoringActionAudio = true;
+                            this.$refs.audioel.pause()
+                        }
                     }
                 },
                 isWaitingVideo: function (val) {
                     this.log(`isWaitingVideo changed to ${val}`);
-                    if (this.isPlaying && !this.isWaitingAudio && !val) {
-                        this.ignoringActionAudio = true;
-                        this.$refs.audioel.play()
-                    }
-                    if (this.isPlaying && !this.isWaitingAudio && val) {
-                        this.ignoringActionAudio = true;
+                    this.ignoringActionAudio = true;
+                    if (val) {
                         this.$refs.audioel.pause()
+                    } else {
+                        this.$refs.audioel.play()
                     }
                 },
                 isWaitingAudio: function (val) {
                     this.log(`isWaitingAudio changed to ${val}`);
-                    if (this.isPlaying && !this.isWaitingVideo && !val) {
-                        this.ignoringActionVideo = true;
-                        this.$refs.videoel.play()
-                    }
-                    if (this.isPlaying && !this.isWaitingVideo && val) {
-                        this.ignoringActionVideo = true;
+                    this.ignoringActionVideo = true;
+                    if (val) {
                         this.$refs.videoel.pause()
+                    } else {
+                        this.$refs.videoel.play()
                     }
                 },
                 newTime: function (val) {
@@ -113,7 +128,7 @@
                 }
             },
             methods: {
-                log(message){
+                log(message) {
                     this.events.push({
                         time: (new Date).getTime(),
                         message: message
@@ -128,10 +143,16 @@
                 randomplace() {
                     this.newTime = Math.random() * this.$refs.videoel.duration
                 },
+                pipToggle() {
+                    if (this.$refs.videoel !== document.pictureInPictureElement) {
+                        this.piped = true
+                        this.$refs.videoel.requestPictureInPicture();
+                    } else {
+                        this.piped = false
+                        document.exitPictureInPicture()
+                    }
+                },
                 progressBarClick(event) {
-                    console.log(event);
-                    console.log(`${event.layerX} ${event.target.parentElement.clientWidth}`)
-
                     this.newTime = ((event.layerX - event.target.offsetLeft) / event.target.parentElement.clientWidth) * this.duration;
                 },
                 secondsToTime(sec) {
@@ -142,17 +163,25 @@
                     return hours > 0 ?
                         `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` :
                         `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                },
+                syncThisShit() {
+                    if(this.isPlaying){
+                        this.$refs.videoel.currentTime = this.$refs.audioel.currentTime;
+                        this.$refs.videoel.play();
+                    }
                 }
             },
             mounted() {
+                // Init canvas
                 let player = this.$refs;
                 this.canvas = player.loadbar.getContext('2d');
+
                 // Update video duration
                 player.videoel.onloadedmetadata = () => {
                     this.duration = player.videoel.duration;
                 }
 
-                // Sync video with audio
+                // Sync video loading
                 player.videoel.onwaiting = () => {
                     this.isWaitingVideo = true;
                 }
@@ -160,7 +189,7 @@
                     this.isWaitingVideo = false;
                 }
 
-                // Sync audio with video
+                // Sync audio loading
                 player.audioel.onwaiting = () => {
                     this.isWaitingAudio = true;
                 }
@@ -169,27 +198,27 @@
                 }
 
                 // Sync time
-                player.videoel.ontimeupdate = () => {
-                    this.currentTime = player.videoel.currentTime;
+                player.audioel.ontimeupdate = () => {
+                    this.currentTime = player.audioel.currentTime;
                     this.loaded = player.videoel.buffered.end(player.videoel.buffered.length - 1)
                 }
 
                 // Sync pause audio
                 player.audioel.onpause = () => {
                     this.log(`>>>>> Audio pause ${this.ignoringActionAudio}`);
-                    if(!this.ignoringActionAudio){
+                    if (!this.ignoringActionAudio) {
                         this.isPlaying = false;
-                    }else{
+                    } else {
                         this.ignoringActionAudio = false;
                     }
                 }
 
                 // Sync playing audio
                 player.audioel.onplaying = () => {
-                    this.log(`>>>>> Audio play`);
-                    if(!this.ignoringActionAudio){
+                    this.log(`>>>>> Audio play ${this.ignoringActionAudio}`);
+                    if (!this.ignoringActionAudio) {
                         this.isPlaying = true;
-                    }else{
+                    } else {
                         this.ignoringActionAudio = false;
                     }
                 }
@@ -197,23 +226,23 @@
                 // Sync pause video
                 player.videoel.onpause = () => {
                     this.log(`>>>>> Video pause ${this.ignoringActionVideo}`);
-                    if(!this.ignoringActionVideo){
+                    if (!this.ignoringActionVideo && (this.$refs.videoel === document.pictureInPictureElement || pageFocused)) {
                         this.isPlaying = false;
-                    }else{
+                    } else {
                         this.ignoringActionVideo = false;
                     }
                 }
 
                 // Sync playing video
                 player.videoel.onplaying = () => {
-                    this.log(`>>>>> Video play`);
-                    if(!this.ignoringActionVideo){
+                    this.log(`>>>>> Video play ${this.ignoringActionVideo}`);
+                    if (!this.ignoringActionVideo) {
                         this.isPlaying = true;
-                    }else{
+                    } else {
                         this.ignoringActionVideo = false;
                     }
                 }
-                
+
                 // Progress bar
                 player.videoel.onprogress = () => {
                     player.loadbar.width = player.loadbar.clientWidth;
@@ -228,6 +257,15 @@
                     }
                 }
             }
+        });
+
+        window.addEventListener('focus', function () {
+            pageFocused = true;
+            app.syncThisShit();
+        });
+
+        window.addEventListener('blur', function () {
+            pageFocused = false;
         });
     </script>
 </body>
