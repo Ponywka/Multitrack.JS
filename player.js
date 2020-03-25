@@ -94,10 +94,8 @@ class MultitrackJS {
             this._setTime(this.duration * event.layerX / this._progressbar.clientWidth)
         });
 
-
         this._progressbarline = document.createElement('div');
         this._progressbarline.setAttribute("name", "progress-line");
-        
 
         this._progressbarloaded = document.createElement('canvas');
         this._progressbarloaded.setAttribute("name", "progress-loaded");
@@ -129,7 +127,7 @@ class MultitrackJS {
         flexEl.setAttribute("style", "flex: auto")
         this._overlay_bottom.appendChild(flexEl);
 
-        if('pictureInPictureEnabled' in document) this._overlay_bottom.appendChild(this._pip);
+        if ('pictureInPictureEnabled' in document) this._overlay_bottom.appendChild(this._pip);
         this._overlay_bottom.appendChild(this._fullscreen);
 
         this._element.appendChild(this._overlay);
@@ -157,7 +155,6 @@ class MultitrackJS {
         console.error(`${this._name} | ${text}`)
     }
 
-    // Functions from Vue.JS
     play() {
         this._changePlaying(true);
     }
@@ -184,11 +181,6 @@ class MultitrackJS {
         this._setTime(Math.random() * this.duration)
     }
 
-    /*progressBarClick(event) {
-        this.newTime = ((event.layerX - event.target.offsetLeft) / event.target.parentElement
-            .clientWidth) * this.duration;
-    }*/
-
     _secondsToTime(sec) {
         sec = Math.floor(sec);
         let seconds = sec % 60;
@@ -199,30 +191,20 @@ class MultitrackJS {
             `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    /*invisibleSync() {
-        if (this.playing) {
-            this.serviceVideoPlay()
-        }
-    }*/
-
     _changeVideo(link) {
         console.log(`Video changed to ${link}`)
-        //this._servicePlayingVideo(false)
         this._video.src = link
         this._video.currentTime = this._audio.currentTime;
-        if(this.playing){
-            this._servicePlayingVideo(true)
-        }
+        if (this.playing) this._servicePlayingVideo(true)
         console.log(`COMPLETE! Video changed to ${link}`)
     }
 
     _changeAudio(link) {
         console.log(`Audio changed to ${link}`)
         let time = this._audio.currentTime
-        //this.serviceAudioPause()
         this._audio.src = link
         this._audio.currentTime = time
-        if(this.playing){
+        if (this.playing) {
             this._servicePlayingAudio(true)
         }
         //this.syncThisShit()
@@ -230,16 +212,17 @@ class MultitrackJS {
     }
 
     _servicePlayingVideo(val) {
+        console.log(`(function) value: ${val}`)
         if (val) {
-            if (this._video.paused) {
+            if (!this._video._servicePlay) {
                 this._ignoringActionVideo += 1
-                console.trace("Video+1 Play")
-                this._video.play()
+                this._video.play().then(() => {
+                    this._ignoringActionVideo -= 1
+                })
             }
         } else {
-            if (!this._video.paused) {
+            if (this._video._servicePlay) {
                 this._ignoringActionVideo += 1
-                console.trace("Video+1 Pause")
                 this._video.pause()
             }
         }
@@ -249,29 +232,24 @@ class MultitrackJS {
         if (val) {
             if (this._audio.paused) {
                 this._ignoringActionAudio += 1
-                console.trace("Audio+1 Play")
-                this._audio.play()
+                this._audio.play().then(() => {
+                    this._ignoringActionAudio -= 1
+                })
             }
         } else {
             if (!this._audio.paused) {
                 this._ignoringActionAudio += 1
-                console.trace("Audio+1 Pause")
                 this._audio.pause()
             }
         }
     }
 
-    // Watchers from Vue.JS
     _changePlaying(val) {
         console.log(`isPlaying changed to ${val}`);
         if (val) {
-            if (!this._isWaitingAudio && !this._isWaitingVideo) {
-                this._servicePlayingVideo(true);
-                this._servicePlayingAudio(true);
-            }
+            if (!this._isWaitingAudio) this._servicePlayingVideo(true);
+            if (!this._isWaitingVideo) this._servicePlayingAudio(true);
             this._playBtn.setAttribute("name", "pauseBtn");
-            /*if (Math.abs(this.$refs.videoel.currentTime - this.$refs.audioel.currentTime) > 0.2)
-                this.$refs.videoel.currentTime = this.$refs.audioel.currentTime;*/
         } else {
             this._servicePlayingVideo(false)
             this._servicePlayingAudio(false)
@@ -284,7 +262,7 @@ class MultitrackJS {
         console.log(`isWaitingVideo changed to ${val}`);
         if (val) {
             this._servicePlayingAudio(false)
-        } else if (this.playing && !this._isWaitingAudio) {
+        } else if (this.playing) {
             this._servicePlayingAudio(true)
         }
         this._isWaitingVideo = val;
@@ -332,18 +310,11 @@ class MultitrackJS {
 
         // Sync time
         this._audio.ontimeupdate = () => {
-            //this._log1.innerHTML = `${this._audio.currentTime} | ${this._video.currentTime}`;
-            //this._log2.innerHTML = this._audio.currentTime - this._video.currentTime;
-
             this.currentTime = this._audio.currentTime
             this.currentTimeVideo = this._video.currentTime
             this._progressbarplayed.setAttribute("style", `width: ${100 * this._audio.currentTime / this.duration}%`);
             this._timeEl.innerText = `${this._secondsToTime(this._audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
         }
-
-        /*this._video.ontimeupdate = () => {
-            this.currentTimeVideo = this._video.currentTime
-        }*/
 
         // Sync pause audio
         this._audio.onpause = () => {
@@ -360,16 +331,15 @@ class MultitrackJS {
             console.log(`>>>>> Audio play ${this._ignoringActionAudio}`);
             if (this._ignoringActionAudio == 0) {
                 this._changePlaying(true);
-            } else {
-                this._ignoringActionAudio -= 1;
             }
         }
 
         // Sync pause video
         this._video.onpause = () => {
-            console.log(`>>>>> Video pause ${this._ignoringActionVideo}`);
+            this._video._servicePlay = false;
+            console.log(`(video) _ignoringActionVideo(before) ${this._ignoringActionVideo}`);
             if (this._ignoringActionVideo == 0) {
-                if (this._video === document.pictureInPictureElement || _pageFocused)
+                if (this._video === document.pictureInPictureElement || this._pageFocused)
                     this._changePlaying(false);
             } else {
                 this._ignoringActionVideo -= 1;
@@ -378,11 +348,10 @@ class MultitrackJS {
 
         // Sync playing video
         this._video.onplaying = () => {
-            console.log(`>>>>> Video play ${this._ignoringActionVideo}`);
+            this._video._servicePlay = true;
+            console.log(`(video) _ignoringActionVideo(before) ${this._ignoringActionVideo}`);
             if (this._ignoringActionVideo == 0) {
                 this._changePlaying(true);
-            } else {
-                this._ignoringActionVideo -= 1;
             }
         }
 
@@ -416,6 +385,7 @@ class MultitrackJS {
         window.addEventListener('focus', () => {
             console.log("focus");
             this._pageFocused = true;
+            if (this.playing) this._changePlaying(true);
         });
 
         window.addEventListener('blur', () => {
