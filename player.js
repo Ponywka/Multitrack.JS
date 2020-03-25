@@ -86,6 +86,29 @@ class MultitrackJS {
             }
         };
 
+        // Progress bar
+        this._progressbar = document.createElement('div');
+        this._progressbar.setAttribute("name", "progress-all");
+
+        this._progressbar.addEventListener("click", (event) => {
+            this._setTime(this.duration * event.layerX / this._progressbar.clientWidth)
+        });
+
+
+        this._progressbarline = document.createElement('div');
+        this._progressbarline.setAttribute("name", "progress-line");
+        
+
+        this._progressbarloaded = document.createElement('canvas');
+        this._progressbarloaded.setAttribute("name", "progress-loaded");
+        this._progressbarloaded.setAttribute("height", "1");
+        this._progressbarcanvas = this._progressbarloaded.getContext("2d");
+        this._progressbarplayed = document.createElement('div');
+        this._progressbarplayed.setAttribute("name", "progress-played")
+        this._progressbar.appendChild(this._progressbarline);
+        this._progressbar.appendChild(this._progressbarloaded);
+        this._progressbar.appendChild(this._progressbarplayed);
+
         // Overlays
         this._overlay = document.createElement('div');
         this._overlay.setAttribute("name", "overlay")
@@ -93,6 +116,7 @@ class MultitrackJS {
         this._overlay_bottom = document.createElement('div');
         this._overlay_bottom.setAttribute("name", "overlay-bottom")
         this._overlay.appendChild(this._overlay_bottom);
+        this._overlay.appendChild(this._progressbar);
 
         // Bottom overlay
         this._overlay_bottom.appendChild(this._playBtn);
@@ -105,10 +129,23 @@ class MultitrackJS {
         flexEl.setAttribute("style", "flex: auto")
         this._overlay_bottom.appendChild(flexEl);
 
-        this._overlay_bottom.appendChild(this._pip);
+        if('pictureInPictureEnabled' in document) this._overlay_bottom.appendChild(this._pip);
         this._overlay_bottom.appendChild(this._fullscreen);
 
         this._element.appendChild(this._overlay);
+
+        // LOGGER
+        this._logger = document.createElement('div');
+        this._logger.setAttribute("name", "logger")
+        this._element.appendChild(this._logger);
+
+        setInterval(() => {
+            this._logger.innerText = `Количество игнорируемых действий с видео: ${this._ignoringActionVideo}
+            Количество игнорируемых действий с аудио: ${this._ignoringActionAudio}
+            Ожидание загрузки видео: ${this._isWaitingVideo}
+            Ожидание загрузки аудио: ${this._isWaitingAudio}
+            Разрыв дорожек: ${Math.floor(Math.abs(this._video.currentTime - this._audio.currentTime)*1000)/1000}`;
+        }, 5);
     }
 
     _pageFocused = true;
@@ -129,7 +166,7 @@ class MultitrackJS {
         this._changePlaying(false);
     }
 
-    _newTime(val) {
+    _setTime(val) {
         val = Math.floor(val);
         console.log(`newTime changed to ${val}`);
         this._video.currentTime = val;
@@ -144,7 +181,7 @@ class MultitrackJS {
     }
 
     randomplace() {
-        this._newTime(Math.random() * this.duration)
+        this._setTime(Math.random() * this.duration)
     }
 
     /*progressBarClick(event) {
@@ -168,25 +205,29 @@ class MultitrackJS {
         }
     }*/
 
-    /*changeVid: function (link) {
+    _changeVideo(link) {
         console.log(`Video changed to ${link}`)
-        //this.serviceVideoPause()
-        this.$refs.videoel.src = link
-        this.isWaitingVideo = true
-        this.syncThisShit()
+        //this._servicePlayingVideo(false)
+        this._video.src = link
+        this._video.currentTime = this._audio.currentTime;
+        if(this.playing){
+            this._servicePlayingVideo(true)
+        }
         console.log(`COMPLETE! Video changed to ${link}`)
     }
 
-    changeAud: function (link) {
+    _changeAudio(link) {
         console.log(`Audio changed to ${link}`)
-        let time = this.$refs.audioel.currentTime
+        let time = this._audio.currentTime
         //this.serviceAudioPause()
-        this.$refs.audioel.src = link
-        this.isWaitingAudio = true
-        this.$refs.audioel.currentTime = time
-        this.syncThisShit()
+        this._audio.src = link
+        this._audio.currentTime = time
+        if(this.playing){
+            this._servicePlayingAudio(true)
+        }
+        //this.syncThisShit()
         console.log(`COMPLETE! Audio changed to ${link}`)
-    }*/
+    }
 
     _servicePlayingVideo(val) {
         if (val) {
@@ -296,6 +337,7 @@ class MultitrackJS {
 
             this.currentTime = this._audio.currentTime
             this.currentTimeVideo = this._video.currentTime
+            this._progressbarplayed.setAttribute("style", `width: ${100 * this._audio.currentTime / this.duration}%`);
             this._timeEl.innerText = `${this._secondsToTime(this._audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
         }
 
@@ -351,7 +393,7 @@ class MultitrackJS {
         setInterval(() => {
             let diff = this._audio.currentTime - this._video.currentTime
             let mdiff = Math.abs(diff);
-            if (this.playing && mdiff > 0.2) {
+            if (this.playing && mdiff > 0.066) {
                 if (mdiff < 3) {
                     if (diff > 0) {
                         this._video.playbackRate = diff + 1;
@@ -381,18 +423,20 @@ class MultitrackJS {
             this._pageFocused = false;
         });
         // Progress bar
-        /*this._video.onprogress = () => {
-            player.loadbar.width = player.loadbar.clientWidth;
-            this.canvas.fillStyle = 'white';
-            this.canvas.clearRect(0, 0, player.loadbar.width, 1);
+        this._video.onprogress = () => {
+            var element = this._progressbarloaded;
+            var canvas = this._progressbarcanvas;
+            element.width = element.clientWidth;
+            canvas.fillStyle = 'white';
+            canvas.clearRect(0, 0, element.width, 1);
             for (let i = 0; i < this._video.buffered.length; i++) {
-                var startX = this._video.buffered.start(i) * player.loadbar.width / this
+                var startX = this._video.buffered.start(i) * element.width / this
                     .duration;
-                var endX = this._video.buffered.end(i) * player.loadbar.width / this.duration;
+                var endX = this._video.buffered.end(i) * element.width / this.duration;
                 var width = endX - startX;
 
-                this.canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
+                canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
             }
-        }*/
+        }
     }
 }
