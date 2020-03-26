@@ -3,9 +3,11 @@ class MultitrackJS {
         // Main elements
         this._video = document.createElement('video');
         this._audio = document.createElement('audio');
+        this._subs = document.createElement('div');
+        this._subs.setAttribute("id", "subs");
         this._element.appendChild(this._video);
         this._element.appendChild(this._audio);
-
+        this._element.appendChild(this._subs);
         // Time
         this._timeEl = document.createElement('div');
         this._timeEl.setAttribute("name", "time");
@@ -278,135 +280,145 @@ class MultitrackJS {
         this._isWaitingAudio = val;
     }
 
-    constructor(selector, dataArray) {
-        this._element = document.querySelector(selector);
-        if (!this._element) this._logError(`Can not find "${selector}" element!`);
-
-        this._element.setAttribute("multitrack-js", "")
-
-        this.buildGUI();
-
-        // Update video duration
-        this._video.onloadedmetadata = () => {
-            this.duration = this._video.duration;
-            this._timeEl.innerText = `${this._secondsToTime(this._audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
-        }
-
-        // Sync video loading
-        this._video.onwaiting = () => {
-            this._changeIsWaitingVideo(true);
-        }
-        this._video.oncanplay = () => {
-            this._changeIsWaitingVideo(false);
-        }
-
-        // Sync audio loading
-        this._audio.onwaiting = () => {
-            this._changeIsWaitingAudio(true);
-        }
-        this._audio.oncanplay = () => {
-            this._changeIsWaitingAudio(false);
-        }
-
-        // Sync time
-        this._audio.ontimeupdate = () => {
-            this.currentTime = this._audio.currentTime
-            this.currentTimeVideo = this._video.currentTime
-            this._progressbarplayed.setAttribute("style", `width: ${100 * this._audio.currentTime / this.duration}%`);
-            this._timeEl.innerText = `${this._secondsToTime(this._audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
-        }
-
-        // Sync pause audio
-        this._audio.onpause = () => {
-            console.log(`>>>>> Audio pause ${this._ignoringActionAudio}`);
-            if (this._ignoringActionAudio == 0) {
-                this._changePlaying(false);
-            } else {
-                this._ignoringActionAudio -= 1;
-            }
-        }
-
-        // Sync playing audio
-        this._audio.onplaying = () => {
-            console.log(`>>>>> Audio play ${this._ignoringActionAudio}`);
-            if (this._ignoringActionAudio == 0) {
-                this._changePlaying(true);
-            }
-        }
-
-        // Sync pause video
-        this._video.onpause = () => {
-            this._video._servicePlay = false;
-            console.log(`(video) _ignoringActionVideo(before) ${this._ignoringActionVideo}`);
-            if (this._ignoringActionVideo == 0) {
-                if (this._video === document.pictureInPictureElement || this._pageFocused)
-                    this._changePlaying(false);
-            } else {
-                this._ignoringActionVideo -= 1;
-            }
-        }
-
-        // Sync playing video
-        this._video.onplaying = () => {
-            this._video._servicePlay = true;
-            console.log(`(video) _ignoringActionVideo(before) ${this._ignoringActionVideo}`);
-            if (this._ignoringActionVideo == 0) {
-                this._changePlaying(true);
-            }
-        }
-
-        this._video.src = dataArray.video
-        this._audio.src = dataArray.audio
-
-        // Invisible sync
-        setInterval(() => {
-            let diff = this._audio.currentTime - this._video.currentTime
-            let mdiff = Math.abs(diff);
-            if (this.playing && mdiff > 0.066) {
-                if (mdiff < 3) {
-                    if (diff > 0) {
-                        this._video.playbackRate = diff + 1;
-                        console.log(`VIDEO: ${this._video.playbackRate}`)
-                    } else {
-                        this._audio.playbackRate = 1 - diff;
-                        console.log(`AUDIO: ${this._audio.playbackRate}`)
-                    }
+    // Invisible sync
+    _invisibleSync() {
+        let diff = this._audio.currentTime - this._video.currentTime
+        let mdiff = Math.abs(diff);
+        if (this.playing && mdiff > 0.066) {
+            if (mdiff < 3) {
+                var scale = mdiff + 1;
+                if (diff > 0) {
+                    this._video.playbackRate = scale;
                     setTimeout(() => {
                         this._video.playbackRate = 1;
-                        this._audio.playbackRate = 1;
-                        console.log("STOP SYNC");
+                        this._invisibleSync();
                     }, 1000)
                 } else {
-                    this._video.currentTime = this._audio.currentTime;
+                    this._video.playbackRate = 1 / scale;
+                    console.log(this._video.playbackRate);
+                    setTimeout(() => {
+                        console.log(`${this._audio.currentTime} - ${this._video.currentTime}`);
+                        this._video.playbackRate = 1;
+                        this._invisibleSync();
+                    }, scale * 1000);
+                }
+            } else {
+                this._video.currentTime = this._audio.currentTime;
+                this._invisibleSync();
+            }
+        } else {
+            setTimeout(() => {
+                this._invisibleSync()
+            }, 1000);
+        }
+    }
+
+    constructor(selector, dataArray) {
+        this._element = document.querySelector(selector);
+        if (this._element) {
+            this._element.setAttribute("multitrack-js", "")
+
+            this.buildGUI();
+
+            // Update video duration
+            this._video.onloadedmetadata = () => {
+                this.duration = this._video.duration;
+                this._timeEl.innerText = `${this._secondsToTime(this._audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
+            }
+
+            // Sync video loading
+            this._video.onwaiting = () => {
+                this._changeIsWaitingVideo(true);
+            }
+            this._video.oncanplay = () => {
+                this._changeIsWaitingVideo(false);
+            }
+
+            // Sync audio loading
+            this._audio.onwaiting = () => {
+                this._changeIsWaitingAudio(true);
+            }
+            this._audio.oncanplay = () => {
+                this._changeIsWaitingAudio(false);
+            }
+
+            // Sync time
+            this._audio.ontimeupdate = () => {
+                this.currentTime = this._audio.currentTime
+                this.currentTimeVideo = this._video.currentTime
+                this._progressbarplayed.setAttribute("style", `width: ${100 * this._audio.currentTime / this.duration}%`);
+                this._timeEl.innerText = `${this._secondsToTime(this._audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
+            }
+
+            // Sync pause audio
+            this._audio.onpause = () => {
+                console.log(`>>>>> Audio pause ${this._ignoringActionAudio}`);
+                if (this._ignoringActionAudio == 0) {
+                    this._changePlaying(false);
+                } else {
+                    this._ignoringActionAudio -= 1;
                 }
             }
-        }, 1500);
 
-        window.addEventListener('focus', () => {
-            console.log("focus");
-            this._pageFocused = true;
-            if (this.playing) this._changePlaying(true);
-        });
-
-        window.addEventListener('blur', () => {
-            console.log("blur");
-            this._pageFocused = false;
-        });
-        // Progress bar
-        this._video.onprogress = () => {
-            var element = this._progressbarloaded;
-            var canvas = this._progressbarcanvas;
-            element.width = element.clientWidth;
-            canvas.fillStyle = 'white';
-            canvas.clearRect(0, 0, element.width, 1);
-            for (let i = 0; i < this._video.buffered.length; i++) {
-                var startX = this._video.buffered.start(i) * element.width / this
-                    .duration;
-                var endX = this._video.buffered.end(i) * element.width / this.duration;
-                var width = endX - startX;
-
-                canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
+            // Sync playing audio
+            this._audio.onplaying = () => {
+                console.log(`>>>>> Audio play ${this._ignoringActionAudio}`);
+                if (this._ignoringActionAudio == 0) {
+                    this._changePlaying(true);
+                }
             }
-        }
+
+            // Sync pause video
+            this._video.onpause = () => {
+                this._video._servicePlay = false;
+                console.log(`(video) _ignoringActionVideo(before) ${this._ignoringActionVideo}`);
+                if (this._ignoringActionVideo == 0) {
+                    if (this._video === document.pictureInPictureElement || this._pageFocused)
+                        this._changePlaying(false);
+                } else {
+                    this._ignoringActionVideo -= 1;
+                }
+            }
+
+            // Sync playing video
+            this._video.onplaying = () => {
+                this._video._servicePlay = true;
+                console.log(`(video) _ignoringActionVideo(before) ${this._ignoringActionVideo}`);
+                if (this._ignoringActionVideo == 0) {
+                    this._changePlaying(true);
+                }
+            }
+
+            this._video.src = dataArray.video
+            this._audio.src = dataArray.audio
+
+            window.addEventListener('focus', () => {
+                this._pageFocused = true;
+                if (this.playing) this._changePlaying(true);
+            });
+
+            window.addEventListener('blur', () => {
+                this._pageFocused = false;
+            });
+
+            // Progress bar
+            this._video.onprogress = () => {
+                var element = this._progressbarloaded;
+                var canvas = this._progressbarcanvas;
+                element.width = element.clientWidth;
+                canvas.fillStyle = 'white';
+                canvas.clearRect(0, 0, element.width, 1);
+                for (let i = 0; i < this._video.buffered.length; i++) {
+                    var startX = this._video.buffered.start(i) * element.width / this
+                        .duration;
+                    var endX = this._video.buffered.end(i) * element.width / this.duration;
+                    var width = endX - startX;
+
+                    canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
+                }
+            }
+
+            this._invisibleSync();
+        } else this._logError(`Can not find "${selector}" element!`);
     }
 }
