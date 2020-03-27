@@ -4,10 +4,10 @@
 
     position: relative;
 
-    //width : 854px;
-    //height: 480px;
-    width : 1280px;
-    height: 720px;
+    width : 854px;
+    height: 480px;
+    //width : 1280px;
+    //height: 720px;
 
     video,
     #subs {
@@ -44,8 +44,33 @@
             margin    : 0px 8px;
             box-sizing: border-box;
 
-            &:hover {
+            div[name="timeline-popup"] {
+                position: absolute;
+                bottom: 16px;
+                width: 128px;
+                height: 72px;
+                padding: 2px;
+                border-radius: 2px;
+                background-color: rgba(0,0,0,.5);
+                transform: translateX(-50%);
 
+                div[name="timeline-popup-image"]{
+                    width: 128px;
+                    height: 72px;
+                    background-image: url(videopieces.png);
+                }
+
+                div[name="timeline-popup-time"]{
+                    width: max-content;
+                    font-size: 12px;
+                    margin: 0 auto;
+                    padding: 4px;
+                    background-color: rgba(0,0,0,.5);
+                    transform: translateY(-100%);
+                }
+            }
+
+            &:hover {
                 div[name="progress-line"],
                 canvas[name="progress-loaded"],
                 div[name="progress-played"] {
