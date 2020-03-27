@@ -32,6 +32,10 @@ class MultitrackJS {
             }),
             pip: this._createElement('button', {
                 name: 'pipOn'
+            }),
+            volume: this._createElement('button', {
+                name: 'volume',
+                icon: 3
             })
         },
         progressbar: {
@@ -311,15 +315,24 @@ class MultitrackJS {
             this.form.progressbar.popup.appendChild(this.form.progressbar.popup.text)
             this.form.progressbar._root.appendChild(this.form.progressbar.popup)
 
+            this.form.progressbar.popup.setAttribute('style', 'display: none');
             this.form.progressbar._root.addEventListener("mouseover", (event) => {
-                //this.form.progressbar.popup.setAttribute('style', '');
+                this.form.progressbar.popup.setAttribute('style', 'opacity: 0');
             });
-
             this.form.progressbar._root.addEventListener("mousemove", (event) => {
                 var position = event.layerX / this.form.progressbar._root.clientWidth;
                 var frame = Math.floor(event.layerX / this.form.progressbar._root.clientWidth * 81);
                 this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
-                this.form.progressbar.popup.setAttribute('style', `left: ${event.layerX}px`);
+
+                this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2; 
+
+                if(event.layerX < this.form.progressbar.popup.halfWidth){
+                    this.form.progressbar.popup.setAttribute('style', `left: 0px`);
+                }else if(event.layerX < (this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth)){
+                    this.form.progressbar.popup.setAttribute('style', `left: ${event.layerX - this.form.progressbar.popup.halfWidth}px`);
+                }else{
+                    this.form.progressbar.popup.setAttribute('style', `left: ${this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
+                }
                 this.form.progressbar.popup.image.setAttribute('style', `background-position: ${frame%9 / 8 * 100}% ${((frame - (frame%9))/9) / 8 * 100}%`);
             });
 
@@ -342,7 +355,7 @@ class MultitrackJS {
             this.form.overlays.bottom.appendChild(this._createElement('div', {
                 'style': 'flex: auto'
             }));
-
+            this.form.overlays.bottom.appendChild(this.form.buttons.volume);
             if ('pictureInPictureEnabled' in document) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
             this.form.overlays.bottom.appendChild(this.form.buttons.fullscreen);
 
