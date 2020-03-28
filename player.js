@@ -5,6 +5,13 @@ class MultitrackJS {
         return el;
     }
 
+    _getPosInElement(element, event){
+        return {
+            x: (event.clientX - (element.getBoundingClientRect()).x),
+            y: (event.clientY - (element.getBoundingClientRect()).y)
+        }
+    }
+
     form = {
         video: this._createElement('video'),
         audio: this._createElement('audio'),
@@ -56,6 +63,17 @@ class MultitrackJS {
                 name: 'timeline-popup'
             })
         },
+        volumebar: {
+            _root: this._createElement('div', {
+                name: 'volumebar-all'
+            }),
+            line: this._createElement('div', {
+                name: 'volumebar-line'
+            }),
+            selected: this._createElement('div', {
+                name: 'volumebar-selected'
+            })
+        },
         overlays: {
             _root: this._createElement('div', {
                 name: 'overlay'
@@ -101,10 +119,10 @@ class MultitrackJS {
     _secondsToTime(sec) {
         sec = Math.floor(sec);
         let seconds = sec % 60;
-        let minutes = (sec - seconds) / 60;
-        let hours = (sec - minutes * 60 - seconds) / 3600;
+        let minutes = Math.floor(sec / 60) % 60;
+        let hours = Math.floor(sec / 3600);
         return hours > 0 ?
-            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` :
+            `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` :
             `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
@@ -316,20 +334,35 @@ class MultitrackJS {
             this.form.progressbar._root.appendChild(this.form.progressbar.popup)
 
             this.form.progressbar.popup.setAttribute('style', 'display: none');
+            
+            this.form.progressbar._root.addEventListener("mousedown", (event) => {
+                this.form.progressbar.updateStyle = true;
+            });
+
+            this.form.progressbar._root.addEventListener("mouseup", (event) => {
+                this.form.progressbar.updateStyle = false;
+                this.form.progressbar.popup.setAttribute('style', 'display: none');
+                this.form.progressbar.newTime = this.duration * event.layerX / this.form.progressbar._root.clientWidth;
+                this._setTime(this.form.progressbar.newTime);
+            });
+            
+            
             this.form.progressbar._root.addEventListener("mouseover", (event) => {
                 this.form.progressbar.popup.setAttribute('style', 'opacity: 0');
             });
             this.form.progressbar._root.addEventListener("mousemove", (event) => {
-                var position = event.layerX / this.form.progressbar._root.clientWidth;
-                var frame = Math.floor(event.layerX / this.form.progressbar._root.clientWidth * 81);
+                var cursorX = this._getPosInElement(this.form.progressbar._root, event).x;
+                var position = cursorX / this.form.progressbar._root.clientWidth;
+                if(this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`);
+                var frame = Math.floor(position * 81);
                 this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
 
                 this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2; 
 
-                if(event.layerX < this.form.progressbar.popup.halfWidth){
+                if(cursorX < this.form.progressbar.popup.halfWidth){
                     this.form.progressbar.popup.setAttribute('style', `left: 0px`);
-                }else if(event.layerX < (this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth)){
-                    this.form.progressbar.popup.setAttribute('style', `left: ${event.layerX - this.form.progressbar.popup.halfWidth}px`);
+                }else if(cursorX < (this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth)){
+                    this.form.progressbar.popup.setAttribute('style', `left: ${cursorX - this.form.progressbar.popup.halfWidth}px`);
                 }else{
                     this.form.progressbar.popup.setAttribute('style', `left: ${this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
                 }
@@ -337,8 +370,20 @@ class MultitrackJS {
             });
 
             this.form.progressbar._root.addEventListener("mouseout", (event) => {
-                this.form.progressbar.popup.setAttribute('style', 'display: none');
+                if(!this.form.progressbar.updateStyle) this.form.progressbar.popup.setAttribute('style', 'display: none');
             });
+
+            // Volume bar
+            this.form.volumebar._root.appendChild(this.form.volumebar.line);
+            this.form.volumebar._root.appendChild(this.form.volumebar.selected);
+            this.form.buttons.volume.addEventListener('click', () => {
+                if(this.form.audio.volume != 0){
+                    this.form.audio.lastVolume = this.form.audio.volume;
+                    this.form.audio.volume = 0;
+                }else{
+                    this.form.audio.volume = this.form.audio.lastVolume;
+                }
+            })
 
             // Adding to element
 
@@ -351,14 +396,14 @@ class MultitrackJS {
             this.form.overlays.bottom.appendChild(this.form.buttons.play);
             this.form.overlays.bottom.appendChild(this.form.buttons.backward10);
             this.form.overlays.bottom.appendChild(this.form.buttons.forward10);
+            this.form.overlays.bottom.appendChild(this.form.buttons.volume);
+            this.form.overlays.bottom.appendChild(this.form.volumebar._root);
             this.form.overlays.bottom.appendChild(this.form.time);
             this.form.overlays.bottom.appendChild(this._createElement('div', {
                 'style': 'flex: auto'
             }));
-            this.form.overlays.bottom.appendChild(this.form.buttons.volume);
             if ('pictureInPictureEnabled' in document) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
             this.form.overlays.bottom.appendChild(this.form.buttons.fullscreen);
-
             this.form.overlays._root.appendChild(this.form.overlays.bottom);
             this.form.overlays._root.appendChild(this.form.progressbar._root);
 
@@ -402,7 +447,7 @@ class MultitrackJS {
             // Sync time
             this.form.audio.ontimeupdate = () => {
                 this.currentTime = this.form.audio.currentTime
-                this.form.progressbar.played.setAttribute("style", `width: ${100 * this.form.audio.currentTime / this.duration}%`);
+                if(!this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * this.form.audio.currentTime / this.duration}%`);
                 this.form.time.innerText = `${this._secondsToTime(this.form.audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
             }
 
