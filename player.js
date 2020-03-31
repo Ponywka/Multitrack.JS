@@ -1,14 +1,24 @@
 class MultitrackJS {
-    _createElement(tag, params = {}) {
-        var el = document.createElement(tag);
-        for (var name in params) el.setAttribute(name, params[name]);
-        return el;
+    _name = "MultitrackJS";
+
+    _setSubtitles(content = null){
+        if(this.ass !== undefined){
+            this.ass.destroy()
+            this.ass = undefined;
+        }
+        if(content != null){
+            try{
+                this.ass = new ASS(content, this.form.video, {
+                    container: this.form.subs
+                })
+            }catch(e){}
+        }
     }
 
-    _getPosInElement(element, event){
-        return {
-            x: (event.clientX - (element.getBoundingClientRect()).x),
-            y: (event.clientY - (element.getBoundingClientRect()).y)
+    parameters = {
+        frames: {
+            x: 10,
+            y: 10
         }
     }
 
@@ -24,6 +34,11 @@ class MultitrackJS {
         logger: this._createElement('div', {
             name: 'logger'
         }),
+        settings: {
+            _root: this._createElement('div', {
+                name: 'settings'
+            })
+        },
         buttons: {
             play: this._createElement('button', {
                 name: 'playBtn'
@@ -84,8 +99,20 @@ class MultitrackJS {
         }
     }
 
+    _createElement(tag, params = {}) {
+        var el = document.createElement(tag);
+        for (var name in params) el.setAttribute(name, params[name]);
+        return el;
+    }
+
+    _getPosInElement(element, event){
+        return {
+            x: (event.clientX - (element.getBoundingClientRect()).x),
+            y: (event.clientY - (element.getBoundingClientRect()).y)
+        }
+    }
+
     _pageFocused = true;
-    _name = "MultitrackJS";
 
     _logError(text) {
         console.error(`${this._name} | ${text}`)
@@ -216,7 +243,8 @@ class MultitrackJS {
     _invisibleSync() {
         let diff = this.form.audio.currentTime - this.form.video.currentTime
         let mdiff = Math.abs(diff);
-        if (this.playing && mdiff > 0.066) {
+        if (this.playing && mdiff > (1/60)) {
+            console.log("syncing...")
             if (mdiff < 3) {
                 var scale = mdiff + 1;
                 if (diff > 0) {
@@ -244,9 +272,6 @@ class MultitrackJS {
     }
 
     constructor(selector, dataArray) {
-        if (navigator.userAgent.search(/YaBrowser/) > 0) {
-            //document.location.replace("https://www.mozilla.org/en-US/firefox/download/thanks/");
-        };
         this._element = document.querySelector(selector);
         if (this._element) {
             this._element.setAttribute("multitrack-js", "")
@@ -320,7 +345,7 @@ class MultitrackJS {
 
             // Progress bar
             this.form.progressbar._root.addEventListener("click", (event) => {
-                this._setTime(this.duration * event.layerX / this.form.progressbar._root.clientWidth);
+                this._setTime(this._getPosInElement(this.form.progressbar._root, event) / this.form.progressbar._root.clientWidth);
             });
 
             this.form.progressbar.popup.text = this._createElement('div', {
@@ -342,7 +367,9 @@ class MultitrackJS {
             this.form.progressbar._root.addEventListener("mouseup", (event) => {
                 this.form.progressbar.updateStyle = false;
                 this.form.progressbar.popup.setAttribute('style', 'display: none');
-                this.form.progressbar.newTime = this.duration * event.layerX / this.form.progressbar._root.clientWidth;
+                var cursorX = this._getPosInElement(this.form.progressbar._root, event).x;
+                console.log(cursorX)
+                this.form.progressbar.newTime = this.duration * cursorX / this.form.progressbar._root.clientWidth;
                 this._setTime(this.form.progressbar.newTime);
             });
             
@@ -353,10 +380,10 @@ class MultitrackJS {
             this.form.progressbar._root.addEventListener("mousemove", (event) => {
                 var cursorX = this._getPosInElement(this.form.progressbar._root, event).x;
                 var position = cursorX / this.form.progressbar._root.clientWidth;
+                if(position < 0) position = 0;
+                if(position > 1) position = 1;
                 if(this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`);
-                var frame = Math.floor(position * 81);
                 this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
-
                 this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2; 
 
                 if(cursorX < this.form.progressbar.popup.halfWidth){
@@ -366,7 +393,14 @@ class MultitrackJS {
                 }else{
                     this.form.progressbar.popup.setAttribute('style', `left: ${this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
                 }
-                this.form.progressbar.popup.image.setAttribute('style', `background-position: ${frame%9 / 8 * 100}% ${((frame - (frame%9))/9) / 8 * 100}%`);
+
+                var framesAll = this.parameters.frames.x * this.parameters.frames.y;
+                var frame = Math.floor(position * framesAll);
+                if(frame >= framesAll) frame = framesAll - 1;
+
+                var offsetX = (frame%this.parameters.frames.x) / (this.parameters.frames.x - 1);
+                var offsetY = Math.floor(frame / this.parameters.frames.x) / (this.parameters.frames.y - 1);
+                this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this.parameters.frames.x * 100}%`);
             });
 
             this.form.progressbar._root.addEventListener("mouseout", (event) => {
@@ -386,8 +420,6 @@ class MultitrackJS {
             })
 
             // Adding to element
-
-
             this.form.progressbar.loaded._canvas = this.form.progressbar.loaded.getContext("2d");
             this.form.progressbar._root.appendChild(this.form.progressbar.line);
             this.form.progressbar._root.appendChild(this.form.progressbar.loaded);
@@ -402,7 +434,7 @@ class MultitrackJS {
             this.form.overlays.bottom.appendChild(this._createElement('div', {
                 'style': 'flex: auto'
             }));
-            if ('pictureInPictureEnabled' in document) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
+            if ('pictureInPictureEnabled' in document && !(navigator.userAgent.search(/YaBrowser/) > 0)) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
             this.form.overlays.bottom.appendChild(this.form.buttons.fullscreen);
             this.form.overlays._root.appendChild(this.form.overlays.bottom);
             this.form.overlays._root.appendChild(this.form.progressbar._root);
@@ -411,6 +443,7 @@ class MultitrackJS {
             this._element.appendChild(this.form.audio);
             this._element.appendChild(this.form.subs);
             this._element.appendChild(this.form.overlays._root);
+            this._element.appendChild(this.form.settings._root);
             this._element.appendChild(this.form.logger);
 
             // Logger
