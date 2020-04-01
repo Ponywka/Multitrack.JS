@@ -1,32 +1,41 @@
 class MultitrackJS {
     _name = "MultitrackJS";
 
-    _setSubtitles(content = null){
-        if(this.ass !== undefined){
+    resize() {
+        if (this.ass !== undefined) this.ass.resize()
+        console.log(this.form.video.clientWidth);
+        console.log(this.form.video.clientHeight);
+
+    }
+
+    _setSubtitles(content = null) {
+        if (this.ass !== undefined) {
             this.ass.destroy()
             this.ass = undefined;
         }
-        if(content != null){
-            try{
+        if (content != null) {
+            try {
                 this.ass = new ASS(content, this.form.video, {
-                    container: this.form.subs
+                    container: this.form.subtitles
                 })
-            }catch(e){}
+                this.resize()
+            } catch (e) {}
         }
     }
 
-    parameters = {
+    _parameters = {
         frames: {
             x: 10,
-            y: 10
+            y: 10,
+            image: "frames.png"
         }
     }
 
     form = {
         video: this._createElement('video'),
         audio: this._createElement('audio'),
-        subs: this._createElement('div', {
-            id: 'subs'
+        subtitles: this._createElement('div', {
+            id: 'subtitles'
         }),
         time: this._createElement('div', {
             name: 'time'
@@ -105,7 +114,7 @@ class MultitrackJS {
         return el;
     }
 
-    _getPosInElement(element, event){
+    _getPosInElement(element, event) {
         return {
             x: (event.clientX - (element.getBoundingClientRect()).x),
             y: (event.clientY - (element.getBoundingClientRect()).y)
@@ -243,7 +252,7 @@ class MultitrackJS {
     _invisibleSync() {
         let diff = this.form.audio.currentTime - this.form.video.currentTime
         let mdiff = Math.abs(diff);
-        if (this.playing && mdiff > (1/60)) {
+        if (this.playing && mdiff > (1 / 60)) {
             console.log("syncing...")
             if (mdiff < 3) {
                 var scale = mdiff + 1;
@@ -274,6 +283,12 @@ class MultitrackJS {
     constructor(selector, dataArray) {
         this._element = document.querySelector(selector);
         if (this._element) {
+            this._element.onresize = function () {
+                myScript
+            };
+            window.addEventListener("resize", () => {
+                this.resize()
+            });
             this._element.setAttribute("multitrack-js", "")
 
             // Main elements
@@ -344,6 +359,8 @@ class MultitrackJS {
             };
 
             // Progress bar
+            if (dataArray.preview) this._parameters.frames.image = dataArray.preview
+
             this.form.progressbar._root.addEventListener("click", (event) => {
                 this._setTime(this._getPosInElement(this.form.progressbar._root, event) / this.form.progressbar._root.clientWidth);
             });
@@ -359,7 +376,7 @@ class MultitrackJS {
             this.form.progressbar._root.appendChild(this.form.progressbar.popup)
 
             this.form.progressbar.popup.setAttribute('style', 'display: none');
-            
+
             this.form.progressbar._root.addEventListener("mousedown", (event) => {
                 this.form.progressbar.updateStyle = true;
             });
@@ -372,49 +389,48 @@ class MultitrackJS {
                 this.form.progressbar.newTime = this.duration * cursorX / this.form.progressbar._root.clientWidth;
                 this._setTime(this.form.progressbar.newTime);
             });
-            
-            
+
             this.form.progressbar._root.addEventListener("mouseover", (event) => {
                 this.form.progressbar.popup.setAttribute('style', 'opacity: 0');
             });
             this.form.progressbar._root.addEventListener("mousemove", (event) => {
                 var cursorX = this._getPosInElement(this.form.progressbar._root, event).x;
                 var position = cursorX / this.form.progressbar._root.clientWidth;
-                if(position < 0) position = 0;
-                if(position > 1) position = 1;
-                if(this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`);
+                if (position < 0) position = 0;
+                if (position > 1) position = 1;
+                if (this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`);
                 this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
-                this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2; 
+                this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2;
 
-                if(cursorX < this.form.progressbar.popup.halfWidth){
+                if (cursorX < this.form.progressbar.popup.halfWidth) {
                     this.form.progressbar.popup.setAttribute('style', `left: 0px`);
-                }else if(cursorX < (this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth)){
+                } else if (cursorX < (this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth)) {
                     this.form.progressbar.popup.setAttribute('style', `left: ${cursorX - this.form.progressbar.popup.halfWidth}px`);
-                }else{
+                } else {
                     this.form.progressbar.popup.setAttribute('style', `left: ${this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
                 }
 
-                var framesAll = this.parameters.frames.x * this.parameters.frames.y;
+                var framesAll = this._parameters.frames.x * this._parameters.frames.y;
                 var frame = Math.floor(position * framesAll);
-                if(frame >= framesAll) frame = framesAll - 1;
+                if (frame >= framesAll) frame = framesAll - 1;
 
-                var offsetX = (frame%this.parameters.frames.x) / (this.parameters.frames.x - 1);
-                var offsetY = Math.floor(frame / this.parameters.frames.x) / (this.parameters.frames.y - 1);
-                this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this.parameters.frames.x * 100}%`);
+                var offsetX = (frame % this._parameters.frames.x) / (this._parameters.frames.x - 1);
+                var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
+                this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this._parameters.frames.x * 100}%; background-image: url(${this._parameters.frames.image})`);
             });
 
             this.form.progressbar._root.addEventListener("mouseout", (event) => {
-                if(!this.form.progressbar.updateStyle) this.form.progressbar.popup.setAttribute('style', 'display: none');
+                if (!this.form.progressbar.updateStyle) this.form.progressbar.popup.setAttribute('style', 'display: none');
             });
 
             // Volume bar
             this.form.volumebar._root.appendChild(this.form.volumebar.line);
             this.form.volumebar._root.appendChild(this.form.volumebar.selected);
             this.form.buttons.volume.addEventListener('click', () => {
-                if(this.form.audio.volume != 0){
+                if (this.form.audio.volume != 0) {
                     this.form.audio.lastVolume = this.form.audio.volume;
                     this.form.audio.volume = 0;
-                }else{
+                } else {
                     this.form.audio.volume = this.form.audio.lastVolume;
                 }
             })
@@ -441,7 +457,7 @@ class MultitrackJS {
 
             this._element.appendChild(this.form.video);
             this._element.appendChild(this.form.audio);
-            this._element.appendChild(this.form.subs);
+            this._element.appendChild(this.form.subtitles);
             this._element.appendChild(this.form.overlays._root);
             this._element.appendChild(this.form.settings._root);
             this._element.appendChild(this.form.logger);
@@ -480,7 +496,7 @@ class MultitrackJS {
             // Sync time
             this.form.audio.ontimeupdate = () => {
                 this.currentTime = this.form.audio.currentTime
-                if(!this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * this.form.audio.currentTime / this.duration}%`);
+                if (!this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * this.form.audio.currentTime / this.duration}%`);
                 this.form.time.innerText = `${this._secondsToTime(this.form.audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
             }
 
@@ -556,6 +572,18 @@ class MultitrackJS {
 
             this.form.video.src = dataArray.video
             this.form.audio.src = dataArray.audio
+
+            // Subtitles
+            if (dataArray.subtitles) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', dataArray.subtitles, false);
+                xhr.send();
+                if (xhr.status == 200) {
+                    this._setSubtitles(xhr.responseText);
+                } else {
+                    alert(xhr.status + ': ' + xhr.statusText);
+                }
+            }
         } else this._logError(`Can not find "${selector}" element!`);
     }
 }
