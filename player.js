@@ -1,13 +1,6 @@
 class MultitrackJS {
     _name = "MultitrackJS";
 
-    resize() {
-        if (this.ass !== undefined) this.ass.resize()
-        console.log(this.form.video.clientWidth);
-        console.log(this.form.video.clientHeight);
-
-    }
-
     _setSubtitles(content = null) {
         if (this.ass !== undefined) {
             this.ass.destroy()
@@ -32,13 +25,88 @@ class MultitrackJS {
     }
 
     form = {
-        video: this._createElement('video'),
-        audio: this._createElement('audio'),
+        video: this._createElement('video', {}, (el) => {
+            el._ignoringAction = 0;
+            el.onwaiting = () => {
+                this._changeIsWaitingVideo(true);
+            }
+            el.oncanplay = () => {
+                this._changeIsWaitingVideo(false)
+            }
+            el.onloadedmetadata = () => {
+                this.duration = el.duration;
+                this.form.time.innerText = `${this._secondsToTime(this.form.audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
+            }
+            el.onpause = () => {
+                el._servicePlay = false;
+                if (el._ignoringAction == 0) {
+                    if (el === document.pictureInPictureElement || this._pageFocused || el._leavedFromPiP) {
+                        console.log("(video) PLAYBACK IS STOP!");
+                        this._changePlaying(false);
+                        el._leavedFromPiP = false;
+                    }
+                }
+            }
+            el.onplaying = () => {
+                el._servicePlay = true;
+                if (this.form.audio._ignoringAction == 0) {
+                    this._changePlaying(true);
+                }
+            }
+            el.addEventListener('leavepictureinpicture', () => {
+                this.form.buttons.pip.setAttribute('name', 'pipOn');
+                el._leavedFromPiP = true;
+            })
+            el.onprogress = () => {
+                var element = this.form.progressbar.loaded;
+                var canvas = this.form.progressbar.loaded._canvas;
+                element.width = element.clientWidth;
+                canvas.fillStyle = 'white';
+                canvas.clearRect(0, 0, element.width, 1);
+                for (let i = 0; i < el.buffered.length; i++) {
+                    var startX = el.buffered.start(i) * element.width / this
+                        .duration;
+                    var endX = el.buffered.end(i) * element.width / this.duration;
+                    var width = endX - startX;
+
+                    canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
+                }
+            }
+        }),
+        audio: this._createElement('audio', {}, (el) => {
+            el._ignoringAction = 0;
+            el.onwaiting = () => {
+                this._changeIsWaitingAudio(true);
+            }
+            el.oncanplay = () => {
+                this._changeIsWaitingAudio(false);
+            }
+            el.ontimeupdate = () => {
+                this.currentTime = el.currentTime
+                if (!this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * el.currentTime / this.duration}%`);
+                this.form.time.innerText = `${this._secondsToTime(el.currentTime)} / ${this._secondsToTime(this.duration)}`;
+            }
+            el.onpause = () => {
+                el._servicePlay = false;
+                if (el._ignoringAction == 0) {
+                    console.log("(video) PLAYBACK IS STOP!");
+                    this._changePlaying(false);
+                }
+            }
+            el.onplaying = () => {
+                el._servicePlay = true;
+                if (el._ignoringAction == 0) {
+                    this._changePlaying(true);
+                }
+            }
+        }),
         subtitles: this._createElement('div', {
             id: 'subtitles'
         }),
         time: this._createElement('div', {
             name: 'time'
+        }, (el) => {
+            el.innerText = "--:-- / --:--";
         }),
         logger: this._createElement('div', {
             name: 'logger'
@@ -51,40 +119,155 @@ class MultitrackJS {
         buttons: {
             play: this._createElement('button', {
                 name: 'playBtn'
+            }, (el) => {
+                el.onclick = () => {
+                    this.playing ? this.pause() : this.play();
+                };
             }),
             backward10: this._createElement('button', {
                 name: 'backward10'
+            }, (el) => {
+                el.onclick = () => {
+                    this._forward(-10);
+                };
             }),
             forward10: this._createElement('button', {
                 name: 'forward10'
+            }, (el) => {
+                el.onclick = () => {
+                    this._forward(10);
+                };
             }),
             fullscreen: this._createElement('button', {
                 name: 'fullscreenOn'
+            }, (el) => {
+                el.onclick = (btn) => {
+                    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.mozCancelFullScreen) {
+                            document.mozCancelFullScreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+                        el.setAttribute('name', 'fullscreenOn');
+                    } else {
+                        var element = this._element;
+                        if (element.requestFullscreen) {
+                            element.requestFullscreen();
+                        } else if (element.mozRequestFullScreen) {
+                            element.mozRequestFullScreen();
+                        } else if (element.webkitRequestFullscreen) {
+                            element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                        } else if (element.msRequestFullscreen) {
+                            element.msRequestFullscreen();
+                        }
+                        el.setAttribute('name', 'fullscreenOff');
+                    }
+                };
             }),
             pip: this._createElement('button', {
                 name: 'pipOn'
+            }, (el) => {
+                el.onclick = (btn) => {
+                    if (('pictureInPictureEnabled' in document)) {
+                        if (this.form.video !== document.pictureInPictureElement) {
+                            this._piped = true
+                            this.form.video.requestPictureInPicture();
+                            el.setAttribute('name', 'pipOff');
+                        } else {
+                            this._piped = false
+                            document.exitPictureInPicture()
+                            el.setAttribute('name', 'pipOn');
+                        }
+                    } else {
+                        this._logError('Sorry, your browser is not support picture-in-picture')
+                    }
+                };
             }),
             volume: this._createElement('button', {
                 name: 'volume',
                 icon: 3
+            }, (el) => {
+                el.addEventListener('click', () => {
+                    if (this.form.audio.volume != 0) {
+                        this.form.audio.lastVolume = this.form.audio.volume;
+                        this.form.audio.volume = 0;
+                    } else {
+                        this.form.audio.volume = this.form.audio.lastVolume;
+                    }
+                })
             })
         },
         progressbar: {
-            _root: this._createElement('div', {
-                name: 'progress-all'
-            }),
             line: this._createElement('div', {
                 name: 'progress-line'
             }),
             loaded: this._createElement('canvas', {
                 name: 'progress-loaded',
                 height: 1
+            }, (el) => {
+                el._canvas = el.getContext("2d");
             }),
             played: this._createElement('div', {
                 name: 'progress-played'
             }),
             popup: this._createElement('div', {
-                name: 'timeline-popup'
+                name: 'timeline-popup',
+                style: 'display: none'
+            }, (el) => {
+                el.text = this._createElement('div', {
+                    name: 'timeline-popup-time'
+                });
+                el.image = this._createElement('div', {
+                    name: 'timeline-popup-image'
+                });
+            }),
+            _root: this._createElement('div', {
+                name: 'progress-all'
+            }, (el) => {
+                el.addEventListener("click", (event) => {
+                    this._setTime(this._getPosInElement(el, event) / el.clientWidth);
+                });
+                el.addEventListener("mousedown", () => {
+                    this.form.progressbar.updateStyle = true;
+                });
+                el.addEventListener("mouseup", (event) => {
+                    this.form.progressbar.updateStyle = false;
+                    this.form.progressbar.popup.setAttribute('style', 'display: none');
+                    var cursorX = this._getPosInElement(el, event).x;
+                    this._setTime(this.duration * cursorX / el.clientWidth);
+                });
+                el.addEventListener("mouseover", (event) => {
+                    this.form.progressbar.popup.setAttribute('style', 'opacity: 0');
+                });
+                el.addEventListener("mousemove", (event) => {
+                    var cursorX = this._getPosInElement(el, event).x;
+                    var position = cursorX / el.clientWidth;
+                    if (position < 0) position = 0;
+                    if (position > 1) position = 1;
+                    if (this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`);
+                    this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
+                    this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2;
+                    if (cursorX < this.form.progressbar.popup.halfWidth) {
+                        this.form.progressbar.popup.setAttribute('style', `left: 0px`);
+                    } else if (cursorX < (el.clientWidth - this.form.progressbar.popup.halfWidth)) {
+                        this.form.progressbar.popup.setAttribute('style', `left: ${cursorX - this.form.progressbar.popup.halfWidth}px`);
+                    } else {
+                        this.form.progressbar.popup.setAttribute('style', `left: ${el.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
+                    }
+                    var framesAll = this._parameters.frames.x * this._parameters.frames.y;
+                    var frame = Math.floor(position * framesAll);
+                    if (frame >= framesAll) frame = framesAll - 1;
+                    var offsetX = (frame % this._parameters.frames.x) / (this._parameters.frames.x - 1);
+                    var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
+                    this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this._parameters.frames.x * 100}%; background-image: url(${this._parameters.frames.image})`);
+                });
+                el.addEventListener("mouseout", (event) => {
+                    if (!this.form.progressbar.updateStyle) this.form.progressbar.popup.setAttribute('style', 'display: none');
+                });
             })
         },
         volumebar: {
@@ -101,6 +284,8 @@ class MultitrackJS {
         overlays: {
             _root: this._createElement('div', {
                 name: 'overlay'
+            }, (el) => {
+
             }),
             bottom: this._createElement('div', {
                 name: 'overlay-bottom'
@@ -108,9 +293,62 @@ class MultitrackJS {
         }
     }
 
-    _createElement(tag, params = {}) {
+    _buildGUI() {
+        window.addEventListener("resize", () => {
+            this.resize()
+        })
+        window.addEventListener('focus', () => {
+            this._pageFocused = true;
+            if (this.playing) this._changePlaying(true);
+        })
+        window.addEventListener('blur', () => {
+            this._pageFocused = false;
+        })
+
+        // Progress bar
+        this.form.progressbar.popup.appendChild(this.form.progressbar.popup.image)
+        this.form.progressbar.popup.appendChild(this.form.progressbar.popup.text)
+        this.form.progressbar._root.appendChild(this.form.progressbar.popup)
+        this.form.volumebar._root.appendChild(this.form.volumebar.line)
+        this.form.volumebar._root.appendChild(this.form.volumebar.selected)
+        this.form.progressbar._root.appendChild(this.form.progressbar.line)
+        this.form.progressbar._root.appendChild(this.form.progressbar.loaded)
+        this.form.progressbar._root.appendChild(this.form.progressbar.played)
+        this.form.overlays.bottom.appendChild(this.form.buttons.play)
+        this.form.overlays.bottom.appendChild(this.form.buttons.backward10)
+        this.form.overlays.bottom.appendChild(this.form.buttons.forward10)
+        this.form.overlays.bottom.appendChild(this.form.buttons.volume)
+        this.form.overlays.bottom.appendChild(this.form.volumebar._root)
+        this.form.overlays.bottom.appendChild(this.form.time)
+        this.form.overlays.bottom.appendChild(this._createElement('div', {
+            'style': 'flex: auto'
+        }))
+        if ('pictureInPictureEnabled' in document && !(navigator.userAgent.search(/YaBrowser/) > 0)) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
+        this.form.overlays.bottom.appendChild(this.form.buttons.fullscreen);
+        this.form.overlays._root.appendChild(this.form.overlays.bottom);
+        this.form.overlays._root.appendChild(this.form.progressbar._root);
+
+        this._element.appendChild(this.form.video);
+        this._element.appendChild(this.form.audio);
+        this._element.appendChild(this.form.subtitles);
+        this._element.appendChild(this.form.overlays._root);
+        this._element.appendChild(this.form.settings._root);
+        this._element.appendChild(this.form.logger);
+
+        // Logger
+        setInterval(() => {
+            this.form.logger.innerText = `  Количество игнорируемых действий с видео: ${this.form.video._ignoringAction}
+                                            Количество игнорируемых действий с аудио: ${this.form.audio._ignoringAction}
+                                            Ожидание загрузки видео: ${this.form.video._isWaiting}
+                                            Ожидание загрузки аудио: ${this.form.audio._isWaiting}
+                                            Разрыв дорожек: ${Math.floor(Math.abs(this.form.video.currentTime - this.form.audio.currentTime)*1000)/1000}`;
+        }, 5);
+    }
+
+    _createElement(tag, params = {}, actions = () => {}) {
         var el = document.createElement(tag);
         for (var name in params) el.setAttribute(name, params[name]);
+        actions(el);
         return el;
     }
 
@@ -125,6 +363,10 @@ class MultitrackJS {
 
     _logError(text) {
         console.error(`${this._name} | ${text}`)
+    }
+
+    resize() {
+        if (this.ass !== undefined) this.ass.resize()
     }
 
     play() {
@@ -283,296 +525,14 @@ class MultitrackJS {
     constructor(selector, dataArray) {
         this._element = document.querySelector(selector);
         if (this._element) {
-            this._element.onresize = function () {
-                myScript
-            };
-            window.addEventListener("resize", () => {
-                this.resize()
-            });
             this._element.setAttribute("multitrack-js", "")
-
-            // Main elements
-            this.form.video._ignoringAction = 0;
-            this.form.audio._ignoringAction = 0;
-
-            // Time
-            this.form.time.innerText = "--:-- / --:--";
-
-            // Play button
-            this.form.buttons.play.onclick = () => {
-                this.playing ? this.pause() : this.play();
-            };
-
-            // Backward 10 sec
-            this.form.buttons.backward10.onclick = () => {
-                this._forward(-10);
-            };
-
-            // Forward 10 sec
-            this.form.buttons.forward10.onclick = () => {
-                this._forward(10);
-            };
-
-            // Fullscreen
-            this.form.buttons.fullscreen.onclick = (btn) => {
-                if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.mozCancelFullScreen) {
-                        document.mozCancelFullScreen();
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
-                    btn.target.setAttribute('name', 'fullscreenOn');
-                } else {
-                    var element = this._element;
-                    if (element.requestFullscreen) {
-                        element.requestFullscreen();
-                    } else if (element.mozRequestFullScreen) {
-                        element.mozRequestFullScreen();
-                    } else if (element.webkitRequestFullscreen) {
-                        element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                    } else if (element.msRequestFullscreen) {
-                        element.msRequestFullscreen();
-                    }
-                    btn.target.setAttribute('name', 'fullscreenOff');
-                }
-            };
-
-            // Picture-in-Picture
-            this.form.buttons.pip.onclick = (btn) => {
-                if (('pictureInPictureEnabled' in document)) {
-                    if (this.form.video !== document.pictureInPictureElement) {
-                        this._piped = true
-                        this.form.video.requestPictureInPicture();
-                        btn.target.setAttribute('name', 'pipOff');
-                    } else {
-                        this._piped = false
-                        document.exitPictureInPicture()
-                        btn.target.setAttribute('name', 'pipOn');
-                    }
-                } else {
-                    this._logError('Sorry, your browser is not support picture-in-picture')
-                }
-            };
-
-            // Progress bar
-            if (dataArray.preview) this._parameters.frames.image = dataArray.preview
-
-            this.form.progressbar._root.addEventListener("click", (event) => {
-                this._setTime(this._getPosInElement(this.form.progressbar._root, event) / this.form.progressbar._root.clientWidth);
-            });
-
-            this.form.progressbar.popup.text = this._createElement('div', {
-                name: 'timeline-popup-time'
-            });
-            this.form.progressbar.popup.image = this._createElement('div', {
-                name: 'timeline-popup-image'
-            });
-            this.form.progressbar.popup.appendChild(this.form.progressbar.popup.image)
-            this.form.progressbar.popup.appendChild(this.form.progressbar.popup.text)
-            this.form.progressbar._root.appendChild(this.form.progressbar.popup)
-
-            this.form.progressbar.popup.setAttribute('style', 'display: none');
-
-            this.form.progressbar._root.addEventListener("mousedown", (event) => {
-                this.form.progressbar.updateStyle = true;
-            });
-
-            this.form.progressbar._root.addEventListener("mouseup", (event) => {
-                this.form.progressbar.updateStyle = false;
-                this.form.progressbar.popup.setAttribute('style', 'display: none');
-                var cursorX = this._getPosInElement(this.form.progressbar._root, event).x;
-                console.log(cursorX)
-                this.form.progressbar.newTime = this.duration * cursorX / this.form.progressbar._root.clientWidth;
-                this._setTime(this.form.progressbar.newTime);
-            });
-
-            this.form.progressbar._root.addEventListener("mouseover", (event) => {
-                this.form.progressbar.popup.setAttribute('style', 'opacity: 0');
-            });
-            this.form.progressbar._root.addEventListener("mousemove", (event) => {
-                var cursorX = this._getPosInElement(this.form.progressbar._root, event).x;
-                var position = cursorX / this.form.progressbar._root.clientWidth;
-                if (position < 0) position = 0;
-                if (position > 1) position = 1;
-                if (this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`);
-                this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
-                this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2;
-
-                if (cursorX < this.form.progressbar.popup.halfWidth) {
-                    this.form.progressbar.popup.setAttribute('style', `left: 0px`);
-                } else if (cursorX < (this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth)) {
-                    this.form.progressbar.popup.setAttribute('style', `left: ${cursorX - this.form.progressbar.popup.halfWidth}px`);
-                } else {
-                    this.form.progressbar.popup.setAttribute('style', `left: ${this.form.progressbar._root.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
-                }
-
-                var framesAll = this._parameters.frames.x * this._parameters.frames.y;
-                var frame = Math.floor(position * framesAll);
-                if (frame >= framesAll) frame = framesAll - 1;
-
-                var offsetX = (frame % this._parameters.frames.x) / (this._parameters.frames.x - 1);
-                var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
-                this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this._parameters.frames.x * 100}%; background-image: url(${this._parameters.frames.image})`);
-            });
-
-            this.form.progressbar._root.addEventListener("mouseout", (event) => {
-                if (!this.form.progressbar.updateStyle) this.form.progressbar.popup.setAttribute('style', 'display: none');
-            });
-
-            // Volume bar
-            this.form.volumebar._root.appendChild(this.form.volumebar.line);
-            this.form.volumebar._root.appendChild(this.form.volumebar.selected);
-            this.form.buttons.volume.addEventListener('click', () => {
-                if (this.form.audio.volume != 0) {
-                    this.form.audio.lastVolume = this.form.audio.volume;
-                    this.form.audio.volume = 0;
-                } else {
-                    this.form.audio.volume = this.form.audio.lastVolume;
-                }
-            })
-
-            // Adding to element
-            this.form.progressbar.loaded._canvas = this.form.progressbar.loaded.getContext("2d");
-            this.form.progressbar._root.appendChild(this.form.progressbar.line);
-            this.form.progressbar._root.appendChild(this.form.progressbar.loaded);
-            this.form.progressbar._root.appendChild(this.form.progressbar.played);
-
-            this.form.overlays.bottom.appendChild(this.form.buttons.play);
-            this.form.overlays.bottom.appendChild(this.form.buttons.backward10);
-            this.form.overlays.bottom.appendChild(this.form.buttons.forward10);
-            this.form.overlays.bottom.appendChild(this.form.buttons.volume);
-            this.form.overlays.bottom.appendChild(this.form.volumebar._root);
-            this.form.overlays.bottom.appendChild(this.form.time);
-            this.form.overlays.bottom.appendChild(this._createElement('div', {
-                'style': 'flex: auto'
-            }));
-            if ('pictureInPictureEnabled' in document && !(navigator.userAgent.search(/YaBrowser/) > 0)) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
-            this.form.overlays.bottom.appendChild(this.form.buttons.fullscreen);
-            this.form.overlays._root.appendChild(this.form.overlays.bottom);
-            this.form.overlays._root.appendChild(this.form.progressbar._root);
-
-            this._element.appendChild(this.form.video);
-            this._element.appendChild(this.form.audio);
-            this._element.appendChild(this.form.subtitles);
-            this._element.appendChild(this.form.overlays._root);
-            this._element.appendChild(this.form.settings._root);
-            this._element.appendChild(this.form.logger);
-
-            // Logger
-            setInterval(() => {
-                this.form.logger.innerText = `  Количество игнорируемых действий с видео: ${this.form.video._ignoringAction}
-                                                Количество игнорируемых действий с аудио: ${this.form.audio._ignoringAction}
-                                                Ожидание загрузки видео: ${this.form.video._isWaiting}
-                                                Ожидание загрузки аудио: ${this.form.audio._isWaiting}
-                                                Разрыв дорожек: ${Math.floor(Math.abs(this.form.video.currentTime - this.form.audio.currentTime)*1000)/1000}`;
-            }, 5);
-
-            // Update video duration
-            this.form.video.onloadedmetadata = () => {
-                this.duration = this.form.video.duration;
-                this.form.time.innerText = `${this._secondsToTime(this.form.audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
-            }
-
-            // Sync video loading
-            this.form.video.onwaiting = () => {
-                this._changeIsWaitingVideo(true);
-            }
-            this.form.video.oncanplay = () => {
-                this._changeIsWaitingVideo(false);
-            }
-
-            // Sync audio loading
-            this.form.audio.onwaiting = () => {
-                this._changeIsWaitingAudio(true);
-            }
-            this.form.audio.oncanplay = () => {
-                this._changeIsWaitingAudio(false);
-            }
-
-            // Sync time
-            this.form.audio.ontimeupdate = () => {
-                this.currentTime = this.form.audio.currentTime
-                if (!this.form.progressbar.updateStyle) this.form.progressbar.played.setAttribute("style", `width: ${100 * this.form.audio.currentTime / this.duration}%`);
-                this.form.time.innerText = `${this._secondsToTime(this.form.audio.currentTime)} / ${this._secondsToTime(this.duration)}`;
-            }
-
-            // Sync pause audio
-            this.form.audio.onpause = () => {
-                this.form.audio._servicePlay = false;
-                if (this.form.audio._ignoringAction == 0) {
-                    console.log("(video) PLAYBACK IS STOP!");
-                    this._changePlaying(false);
-                }
-            }
-
-            // Sync playing audio
-            this.form.audio.onplaying = () => {
-                this.form.audio._servicePlay = true;
-                if (this.form.audio._ignoringAction == 0) {
-                    this._changePlaying(true);
-                }
-            }
-
-            // Sync pause video
-            this.form.video.onpause = () => {
-                this.form.video._servicePlay = false;
-                if (this.form.video._ignoringAction == 0) {
-                    if (this.form.video === document.pictureInPictureElement || this._pageFocused || this.form.video._leavedFromPiP) {
-                        console.log("(video) PLAYBACK IS STOP!");
-                        this._changePlaying(false);
-                        this.form.video._leavedFromPiP = false;
-                    }
-                }
-            }
-
-            // Sync playing video
-            this.form.video.onplaying = () => {
-                this.form.video._servicePlay = true;
-                if (this.form.audio._ignoringAction == 0) {
-                    this._changePlaying(true);
-                }
-            }
-
-            this.form.video.addEventListener('leavepictureinpicture', () => {
-                this.form.buttons.pip.setAttribute('name', 'pipOn');
-                this.form.video._leavedFromPiP = true;
-            });
-
-            window.addEventListener('focus', () => {
-                this._pageFocused = true;
-                if (this.playing) this._changePlaying(true);
-            });
-
-            window.addEventListener('blur', () => {
-                this._pageFocused = false;
-            });
-
-            // Progress bar
-            this.form.video.onprogress = () => {
-                var element = this.form.progressbar.loaded;
-                var canvas = this.form.progressbar.loaded._canvas;
-                element.width = element.clientWidth;
-                canvas.fillStyle = 'white';
-                canvas.clearRect(0, 0, element.width, 1);
-                for (let i = 0; i < this.form.video.buffered.length; i++) {
-                    var startX = this.form.video.buffered.start(i) * element.width / this
-                        .duration;
-                    var endX = this.form.video.buffered.end(i) * element.width / this.duration;
-                    var width = endX - startX;
-
-                    canvas.fillRect(Math.floor(startX), 0, Math.floor(width), 1);
-                }
-            }
-
-            this._invisibleSync();
+            this._buildGUI()
+            this._invisibleSync()
 
             this.form.video.src = dataArray.video
             this.form.audio.src = dataArray.audio
-
+            if (dataArray.preview) this._parameters.frames.image = dataArray.preview
+            
             // Subtitles
             if (dataArray.subtitles) {
                 var xhr = new XMLHttpRequest();
