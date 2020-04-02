@@ -1,9 +1,11 @@
 *[multitrack-js] {
-    font-family: -apple-system, BlinkMacSystemFont, Roboto, Open Sans, Helvetica Neue, "Noto Sans Armenian", "Noto Sans Bengali", "Noto Sans Cherokee", "Noto Sans Devanagari", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Hebrew", "Noto Sans Kannada", "Noto Sans Khmer", "Noto Sans Lao", "Noto Sans Osmanya", "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Thai", sans-serif;
-    color      : white;
-    background : black;
-
-    position: relative;
+    font-family        : -apple-system, BlinkMacSystemFont, Roboto, Open Sans, Helvetica Neue, "Noto Sans Armenian", "Noto Sans Bengali", "Noto Sans Cherokee", "Noto Sans Devanagari", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Hebrew", "Noto Sans Kannada", "Noto Sans Khmer", "Noto Sans Lao", "Noto Sans Osmanya", "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Thai", sans-serif;
+    position           : relative;
+    background         : black;
+    color              : white;
+    user-select        : none;
+    -moz-user-select   : none;
+    -webkit-user-select: none;
 
     video,
     #subtitles {
@@ -49,8 +51,8 @@
                 background-color: rgba(0, 0, 0, .5);
 
                 div[name="timeline-popup-image"] {
-                    width           : 128px;
-                    height          : 72px;
+                    width : 128px;
+                    height: 72px;
                 }
 
                 div[name="timeline-popup-time"] {
@@ -93,6 +95,10 @@
                 width    : 100%;
             }
 
+            div[name="progress-played"] {
+                width: 0%;
+            }
+
             div[name="progress-line"] {
                 background-color: rgba(255, 255, 255, .25);
             }
@@ -120,7 +126,7 @@
                 transform: translateY(-50%);
                 top      : 50%;
                 left     : 0;
-                height: 4px;
+                height   : 4px;
                 width    : 100%;
             }
 
