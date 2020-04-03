@@ -21,8 +21,9 @@
     <div id="player"></div>
     <script src="//cdn.jsdelivr.net/npm/assjs/dist/ass.js"></script>
     <script>
+        var player;
         less.refresh().then(() => {
-            var player = new MultitrackJS("#player", {
+            player = new MultitrackJS("#player", {
                 video: "//base.bronyru.info/FiM/media/s7/e2/1080.mp4",
                 audio: "//base.bronyru.info/FiM/media/s7/e2/rak.mp4",
                 subtitles: "//base.bronyru.info/FiM/media/s7/e2/a2a-rus.ass"/*,

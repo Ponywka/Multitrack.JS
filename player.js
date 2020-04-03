@@ -113,6 +113,7 @@ class MultitrackJS {
     }
 
     _servicePlayingVideo(val) {
+        console.trace(`_servicePlayingVideo(${val})`);
         if (val) {
             if (!this.form.video._servicePlay) {
                 this.form.video._ignoringAction += 1
@@ -133,6 +134,7 @@ class MultitrackJS {
     }
 
     _servicePlayingAudio(val) {
+        console.trace(`_servicePlayingAudio(${val})`);
         if (val) {
             if (!this.form.audio._servicePlay) {
                 this.form.audio._ignoringAction += 1
@@ -230,7 +232,7 @@ class MultitrackJS {
             this._pageFocused = false;
         })
 
-        const createElement = (tag, params = {}, actions = () => {})=>{
+        const createElement = (tag, params = {}, actions = () => {}) => {
             var el = document.createElement(tag);
             for (var name in params) el.setAttribute(name, params[name]);
             actions(el);
@@ -245,10 +247,12 @@ class MultitrackJS {
                 el._servicePlay = false;
                 // Обработка событий плей/пауза
                 el.onplaying = () => {
+                    console.log("VIDEO PLAY")
                     el._servicePlay = true;
-                    if (!this.form.audio._ignoringAction) this._changePlaying(true)
+                    if (!el._ignoringAction) this._changePlaying(true)
                 }
                 el.onpause = () => {
+                    console.log("VIDEO PAUSE")
                     el._servicePlay = false;
                     if (!el._ignoringAction) {
                         if (el === document.pictureInPictureElement || this._pageFocused || el._leavedFromPiP) {
@@ -286,6 +290,7 @@ class MultitrackJS {
                 }
                 // Остальные обработчики событий
                 el.addEventListener('leavepictureinpicture', () => {
+                    console.log("test")
                     this.form.buttons.pip.setAttribute('name', 'pipOn');
                     el._leavedFromPiP = true;
                 })
@@ -296,14 +301,14 @@ class MultitrackJS {
                 el._servicePlay = false;
                 // Обработка событий плей/пауза
                 el.onplaying = () => {
+                    console.log("AUDIO PLAY")
                     el._servicePlay = true;
-                    if (el._ignoringAction == 0) {
-                        this._changePlaying(true);
-                    }
+                    if (!el._ignoringAction) this._changePlaying(true)
                 }
                 el.onpause = () => {
+                    console.log("AUDIO PAUSE")
                     el._servicePlay = false;
-                    if (el._ignoringAction == 0) {
+                    if (!el._ignoringAction) {
                         console.log("(video) PLAYBACK IS STOP!");
                         this._changePlaying(false);
                     }
@@ -383,7 +388,7 @@ class MultitrackJS {
                             } else if (document.msExitFullscreen) {
                                 document.msExitFullscreen();
                             }
-                            if(navigator.userAgent.search(/Safari/) > 0) this._element.removeAttribute('style');
+                            if (navigator.userAgent.search(/Safari/) > 0) this._element.removeAttribute('style');
                             el.setAttribute('name', 'fullscreenOn');
                         } else {
                             var element = this._element;
@@ -396,7 +401,7 @@ class MultitrackJS {
                             } else if (element.msRequestFullscreen) {
                                 element.msRequestFullscreen();
                             }
-                            if(navigator.userAgent.search(/Safari/) > 0) this._element.setAttribute('style', 'width: 100%; height: 100%;');
+                            if (navigator.userAgent.search(/Safari/) > 0) this._element.setAttribute('style', 'width: 100%; height: 100%;');
                             el.setAttribute('name', 'fullscreenOff');
                         }
                     };
@@ -485,7 +490,7 @@ class MultitrackJS {
                         if (position < 0) position = 0;
                         if (position > 1) position = 1;
                         // Обновление ширины текущей позиции
-                        if (this.form.progressbar.updateStyle){
+                        if (this.form.progressbar.updateStyle) {
                             this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`)
                         }
                         // Обновление всплывающего пузырька
@@ -510,14 +515,41 @@ class MultitrackJS {
             },
             // Ползунок громкости
             volumebar: {
-                _root: createElement('div', {
-                    name: 'volumebar-all'
-                }),
                 line: createElement('div', {
                     name: 'volumebar-line'
                 }),
                 selected: createElement('div', {
                     name: 'volumebar-selected'
+                }),
+                _root: createElement('div', {
+                    name: 'volumebar-all'
+                }, (el) => {
+                    el.addEventListener("mousedown", () => {
+                        this.form.volumebar.updateStyle = true
+                    })
+                    el.addEventListener("mouseup", (event) => {
+                        this.form.volumebar.updateStyle = false
+                        // Получение координаты и вычисление позиции (от 0 до 1)
+                        var cursorX = this._getPosInElement(el, event).x;
+                        var position = this._getPosInElement(el, event).x / el.clientWidth;
+                        if (position < 0) position = 0;
+                        if (position > 1) position = 1;
+                        // Обновление ширины текущей позиции
+                        this.form.volumebar.selected.setAttribute("style", `width: ${100 * position}%`)
+                        this.form.audio.volume = position
+                    })
+                    el.addEventListener("mousemove", (event) => {
+                        if (this.form.volumebar.updateStyle) {
+                            // Получение координаты и вычисление позиции (от 0 до 1)
+                            var cursorX = this._getPosInElement(el, event).x;
+                            var position = cursorX / el.clientWidth;
+                            if (position < 0) position = 0;
+                            if (position > 1) position = 1;
+                            // Обновление ширины текущей позиции
+                            this.form.volumebar.selected.setAttribute("style", `width: ${100 * position}%`)
+                            this.form.audio.volume = position
+                        }
+                    })
                 })
             },
             // Оверлеи
