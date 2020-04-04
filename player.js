@@ -18,6 +18,8 @@ class MultitrackJS {
 
             this.form.video.src = dataArray.video
             this.form.audio.src = dataArray.audio
+            this.form.title.innerText = dataArray.title
+
             if (dataArray.preview) this._parameters.frames.image = dataArray.preview
 
             // Subtitles
@@ -54,6 +56,12 @@ class MultitrackJS {
         val = Math.floor(val);
         this.form.video.currentTime = val;
         this.form.audio.currentTime = val;
+    }
+
+    setVolume(val) {
+        this.form.buttons.volume.setAttribute("icon", Math.ceil(val * 3))
+        this.form.volumebar.selected.setAttribute("style", `width: ${100 * val}%`)
+        this.form.audio.volume = val
     }
 
     resize() {
@@ -337,14 +345,34 @@ class MultitrackJS {
             }, (el) => {
                 el.innerText = "--:-- / --:--";
             }),
+            // Отображение названия
+            title: createElement('div', {
+                name: 'title'
+            }, (el) => {
+                el.innerText = "Loading...";
+            }),
             // Информация для гиков
             logger: createElement('div', {
                 name: 'logger'
             }),
             // Окно настроек
             settings: {
+                title: createElement('div', {
+                    name: 'title',
+                }),
+                header: createElement('div', {
+                    name: 'header'
+                }),
+                body: createElement('div', {
+                    name: 'body'
+                }, (el) => {
+                    /*var createList = () => {
+
+                    }*/
+                }),
                 _root: createElement('div', {
-                    name: 'settings'
+                    name: 'settings',
+                    style: 'display: none'
                 })
             },
             // Кнопки (массив)
@@ -434,10 +462,27 @@ class MultitrackJS {
                     el.addEventListener('click', () => {
                         if (this.form.audio.volume != 0) {
                             this.form.audio.lastVolume = this.form.audio.volume;
-                            this.form.audio.volume = 0;
+                            this.setVolume(0);
                         } else {
-                            this.form.audio.volume = this.form.audio.lastVolume;
+                            this.setVolume(this.form.audio.lastVolume);
                         }
+                    })
+                }),
+                // Открыть меню
+                openmenu: createElement('button', {
+                    name: 'openmenu'
+                }, (el) => {
+                    el.addEventListener('click', () => {
+                        this.form.overlays._root.setAttribute('style', 'display: none');
+                        this.form.settings._root.removeAttribute('style');
+                    })
+                }),
+                closemenu: createElement('button', {
+                    name: 'closemenu'
+                }, (el) => {
+                    el.addEventListener('click', () => {
+                        this.form.settings._root.setAttribute('style', 'display: none');
+                        this.form.overlays._root.removeAttribute('style');
                     })
                 })
             },
@@ -534,9 +579,7 @@ class MultitrackJS {
                         var position = this._getPosInElement(el, event).x / el.clientWidth;
                         if (position < 0) position = 0;
                         if (position > 1) position = 1;
-                        // Обновление ширины текущей позиции
-                        this.form.volumebar.selected.setAttribute("style", `width: ${100 * position}%`)
-                        this.form.audio.volume = position
+                        this.setVolume(position);
                     })
                     el.addEventListener("mousemove", (event) => {
                         if (this.form.volumebar.updateStyle) {
@@ -545,9 +588,7 @@ class MultitrackJS {
                             var position = cursorX / el.clientWidth;
                             if (position < 0) position = 0;
                             if (position > 1) position = 1;
-                            // Обновление ширины текущей позиции
-                            this.form.volumebar.selected.setAttribute("style", `width: ${100 * position}%`)
-                            this.form.audio.volume = position
+                            this.setVolume(position);
                         }
                     })
                 })
@@ -561,6 +602,9 @@ class MultitrackJS {
                 }),
                 bottom: createElement('div', {
                     name: 'overlay-bottom'
+                }),
+                top: createElement('div', {
+                    name: 'overlay-top'
                 })
             }
         }
@@ -577,6 +621,9 @@ class MultitrackJS {
         this.form.volumebar._root.appendChild(this.form.volumebar.line)
         this.form.volumebar._root.appendChild(this.form.volumebar.selected)
 
+        this.form.overlays.top.appendChild(this.form.title)
+        this.form.overlays.top.appendChild(this.form.buttons.openmenu)
+
         this.form.overlays.bottom.appendChild(this.form.buttons.play)
         this.form.overlays.bottom.appendChild(this.form.buttons.backward10)
         this.form.overlays.bottom.appendChild(this.form.buttons.forward10)
@@ -589,16 +636,23 @@ class MultitrackJS {
         if ('pictureInPictureEnabled' in document && !(navigator.userAgent.search(/YaBrowser/) > 0)) this.form.overlays.bottom.appendChild(this.form.buttons.pip);
         this.form.overlays.bottom.appendChild(this.form.buttons.fullscreen);
 
+        this.form.overlays._root.appendChild(this.form.overlays.top);
         this.form.overlays._root.appendChild(this.form.overlays.bottom);
         this.form.overlays._root.appendChild(this.form.progressbar._root);
+
+        this.form.settings.title.innerText = "Настройки";
+        this.form.settings.header.appendChild(this.form.settings.title);
+        this.form.settings.header.appendChild(this.form.buttons.closemenu);
+
+        this.form.settings._root.appendChild(this.form.settings.header);
+        this.form.settings._root.appendChild(this.form.settings.body);
 
         this._element.appendChild(this.form.video);
         this._element.appendChild(this.form.audio);
         this._element.appendChild(this.form.subtitles);
+        this._element.appendChild(this.form.logger);
         this._element.appendChild(this.form.overlays._root);
         this._element.appendChild(this.form.settings._root);
-        this._element.appendChild(this.form.logger);
-
         // Информация для гиков
         setInterval(() => {
             this.form.logger.innerText = `  Количество игнорируемых действий с видео: ${this.form.video._ignoringAction}
