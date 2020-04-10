@@ -227,6 +227,20 @@ class MultitrackJS {
 
     // Сборка графического интерфейса
     _buildGUI() {
+        this._moveEvents = [];
+        document.addEventListener('mousemove', (event) => {
+            for (let func of this._moveEvents) {
+                func.move(event)
+            }
+        })
+
+        document.addEventListener('mouseup', (event) => {
+            for (let func of this._moveEvents) {
+                func.release(event)
+            }
+            this._moveEvents = [];
+        })
+
         // Свернуто ли окно (нужно для правильной работы плеера, когда окно свернуто)
         this._pageFocused = true;
         window.addEventListener("resize", () => {
@@ -514,21 +528,7 @@ class MultitrackJS {
                 _root: createElement('div', {
                     name: 'progress-all'
                 }, (el) => {
-                    el.addEventListener("mousedown", () => {
-                        this.form.progressbar.updateStyle = true
-                    })
-                    el.addEventListener("mouseup", (event) => {
-                        this.form.progressbar.updateStyle = false
-                        this.form.progressbar.popup.setAttribute('style', 'display: none')
-                        this.setTime(this.duration * this._getPosInElement(el, event).x / el.clientWidth)
-                    })
-                    el.addEventListener("mouseover", (event) => {
-                        this.form.progressbar.popup.setAttribute('style', 'opacity: 0')
-                    })
-                    el.addEventListener("mouseout", (event) => {
-                        this.form.progressbar.popup.setAttribute('style', 'display: none')
-                    })
-                    el.addEventListener("mousemove", (event) => {
+                    let move = (event) => {
                         // Получение координаты и вычисление позиции (от 0 до 1)
                         var cursorX = this._getPosInElement(el, event).x;
                         var position = cursorX / el.clientWidth;
@@ -555,6 +555,26 @@ class MultitrackJS {
                         var offsetX = (frame % this._parameters.frames.x) / (this._parameters.frames.x - 1);
                         var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
                         this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this._parameters.frames.x * 100}%; background-image: url(${this._parameters.frames.image})`);
+                    }
+                    let release = (event) => {
+                        this.form.progressbar.updateStyle = false;
+                        this.form.progressbar.popup.setAttribute('style', 'display: none');
+                        this.setTime(this.duration * this._getPosInElement(el, event).x / el.clientWidth);
+                    }
+                    el.addEventListener("mousedown", (event) => {
+                        this.form.progressbar.updateStyle = true
+                        Object(this._moveEvents).push({
+                            move: move,
+                            release: release
+                        })
+                    })
+
+                    // Володя не забудь
+                    el.addEventListener("mouseover", (event) => {
+                        this.form.progressbar.popup.setAttribute('style', 'opacity: 0')
+                    })
+                    el.addEventListener("mouseout", (event) => {
+                        this.form.progressbar.popup.setAttribute('style', 'display: none')
                     })
                 })
             },
@@ -569,10 +589,7 @@ class MultitrackJS {
                 _root: createElement('div', {
                     name: 'volumebar-all'
                 }, (el) => {
-                    el.addEventListener("mousedown", () => {
-                        this.form.volumebar.updateStyle = true
-                    })
-                    el.addEventListener("mouseup", (event) => {
+                    let release = (event) => {
                         this.form.volumebar.updateStyle = false
                         // Получение координаты и вычисление позиции (от 0 до 1)
                         var cursorX = this._getPosInElement(el, event).x;
@@ -580,8 +597,8 @@ class MultitrackJS {
                         if (position < 0) position = 0;
                         if (position > 1) position = 1;
                         this.setVolume(position);
-                    })
-                    el.addEventListener("mousemove", (event) => {
+                    }
+                    let move = (event) => {
                         if (this.form.volumebar.updateStyle) {
                             // Получение координаты и вычисление позиции (от 0 до 1)
                             var cursorX = this._getPosInElement(el, event).x;
@@ -590,6 +607,14 @@ class MultitrackJS {
                             if (position > 1) position = 1;
                             this.setVolume(position);
                         }
+                    }
+                    el.addEventListener("mousedown", () => {
+                        this.form.volumebar.updateStyle = true
+                        this.form.audio.lastVolume = this.form.audio.volume
+                        Object(this._moveEvents).push({
+                            move: move,
+                            release: release
+                        })
                     })
                 })
             },
