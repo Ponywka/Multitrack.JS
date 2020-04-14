@@ -23,7 +23,7 @@ class MultitrackJS {
             if (dataArray.preview) this._parameters.frames.image = dataArray.preview
 
             // Subtitles
-            if (dataArray.subtitles) {
+            /*if (dataArray.subtitles) {
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', dataArray.subtitles, false);
                 xhr.send();
@@ -32,7 +32,7 @@ class MultitrackJS {
                 } else {
                     alert(xhr.status + ': ' + xhr.statusText);
                 }
-            }
+            }*/
         } else this._logError(`Can not find "${selector}" element!`);
     }
 
@@ -371,18 +371,41 @@ class MultitrackJS {
             }),
             // Окно настроек
             settings: {
+                tabs: {
+                    qualty: {
+                        titlename: "Качество",
+                        icon: "",
+                        _root: createElement('div')
+                    },
+                    dubs: {
+                        titlename: "Озвучки",
+                        icon: "",
+                        _root: createElement('div')
+                    },
+                    subtitles: {
+                        titlename: "Субтитры",
+                        icon: "",
+                        _root: createElement('div')
+                    },
+                    info: {
+                        titlename: "Информация",
+                        icon: "",
+                        _root: createElement('div')
+                    }
+                },
+                tabSwitcher: {
+                    _root: createElement('div', {
+                        name: 'tabs',
+                    })
+                },
                 title: createElement('div', {
                     name: 'title',
                 }),
                 header: createElement('div', {
-                    name: 'header'
+                    name: 'settingsHeader'
                 }),
                 body: createElement('div', {
-                    name: 'body'
-                }, (el) => {
-                    /*var createList = () => {
-
-                    }*/
+                    name: 'settingsBody'
                 }),
                 _root: createElement('div', {
                     name: 'settings',
@@ -528,16 +551,7 @@ class MultitrackJS {
                 _root: createElement('div', {
                     name: 'progress-all'
                 }, (el) => {
-                    let move = (event) => {
-                        // Получение координаты и вычисление позиции (от 0 до 1)
-                        var cursorX = this._getPosInElement(el, event).x;
-                        var position = cursorX / el.clientWidth;
-                        if (position < 0) position = 0;
-                        if (position > 1) position = 1;
-                        // Обновление ширины текущей позиции
-                        if (this.form.progressbar.updateStyle) {
-                            this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`)
-                        }
+                    let updatePopup = (cursorX, position) => {
                         // Обновление всплывающего пузырька
                         this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
                         this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2;
@@ -556,6 +570,19 @@ class MultitrackJS {
                         var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
                         this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this._parameters.frames.x * 100}%; background-image: url(${this._parameters.frames.image})`);
                     }
+
+                    let move = (event) => {
+                        // Получение координаты и вычисление позиции (от 0 до 1)
+                        var cursorX = this._getPosInElement(el, event).x;
+                        var position = cursorX / el.clientWidth;
+                        if (position < 0) position = 0;
+                        if (position > 1) position = 1;
+                        // Обновление ширины текущей позиции
+                        if (this.form.progressbar.updateStyle) {
+                            this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`)
+                        }
+                        updatePopup(cursorX, position)
+                    }
                     let release = (event) => {
                         this.form.progressbar.updateStyle = false;
                         this.form.progressbar.popup.setAttribute('style', 'display: none');
@@ -572,6 +599,13 @@ class MultitrackJS {
                     // Володя не забудь
                     el.addEventListener("mouseover", (event) => {
                         this.form.progressbar.popup.setAttribute('style', 'opacity: 0')
+                    })
+                    el.addEventListener("mousemove", (event) => {
+                        var cursorX = this._getPosInElement(el, event).x;
+                        var position = cursorX / el.clientWidth;
+                        if (position < 0) position = 0;
+                        if (position > 1) position = 1;
+                        updatePopup(cursorX, position)
                     })
                     el.addEventListener("mouseout", (event) => {
                         this.form.progressbar.popup.setAttribute('style', 'display: none')
@@ -664,6 +698,34 @@ class MultitrackJS {
         this.form.overlays._root.appendChild(this.form.overlays.top);
         this.form.overlays._root.appendChild(this.form.overlays.bottom);
         this.form.overlays._root.appendChild(this.form.progressbar._root);
+
+        this.form.settings.body.appendChild(this.form.settings.tabSwitcher._root)
+        const hideAllElements = () => {
+            for (let page in this.form.settings.tabs) {
+                this.form.settings.tabs[page]._root.setAttribute('style', 'display: none')
+            }
+        }
+        let btnNum = 0;
+        for (let el in this.form.settings.tabs) {
+            this.form.settings.body.appendChild(this.form.settings.tabs[el]._root)
+            this.form.settings.tabSwitcher[`btn${el}`] = createElement("div", {
+                name: "listEl",
+                page: el
+            }, (btn) => {
+                btn.innerText += this.form.settings.tabs[el].titlename
+                btn.onclick = (event) => {
+                    hideAllElements()
+                    this.form.settings.tabs[el]._root.removeAttribute('style')
+                    for (let el in this.form.settings.tabSwitcher) {
+                        if(el != "_root") this.form.settings.tabSwitcher[el].removeAttribute('selected')
+                    }
+                    btn.setAttribute('selected', 'true')
+                }
+            })
+            this.form.settings.tabSwitcher._root.appendChild(this.form.settings.tabSwitcher[`btn${el}`])
+            if(btnNum == 0) this.form.settings.tabSwitcher[`btn${el}`].click()
+            btnNum++;
+        }
 
         this.form.settings.title.innerText = "Настройки";
         this.form.settings.header.appendChild(this.form.settings.title);

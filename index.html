@@ -16,6 +16,41 @@
 </head>
 
 <body>
+    <!--document.querySelector("a").onclick = () => {
+	alert("Ты сука2")
+	return false
+}-->
+    <div name="body" style="display: flex;">
+        <div style="width: 256px">
+            <a href="/"
+                style="height: 48px;width: 100%;box-sizing: border-box;/*! background-color: black; */color: white;display: flex;padding: 12px;line-height: 24px;">
+                <div
+                    style="mask: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11v6zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v4zm-3.5-.5h2v-3h-2v3z'/%3E%3C/svg%3E&quot;);background-color: white;width: 24px;height: 24px;margin-right: 12px;">
+    </a>Качество
+            </div>
+            <div
+                style="height: 48px;width: 100%;box-sizing: border-box;background-color: white;color: black;display: flex;padding: 12px;line-height: 24px;">
+                <div
+                    style="mask: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11v6zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v4zm-3.5-.5h2v-3h-2v3z'/%3E%3C/svg%3E&quot;);background-color: black;width: 24px;height: 24px;margin-right: 12px;">
+                </div>Озвучка
+            </div>
+            <div
+                style="height: 48px;width: 100%;box-sizing: border-box;/*! background-color: black; */color: white;display: flex;padding: 12px;line-height: 24px;">
+                <div
+                    style="mask: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11v6zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v4zm-3.5-.5h2v-3h-2v3z'/%3E%3C/svg%3E&quot;);background-color: white;width: 24px;height: 24px;margin-right: 12px;">
+                </div>Качество
+            </div>
+            <div
+                style="height: 48px;width: 100%;box-sizing: border-box;/*! background-color: black; */color: white;display: flex;padding: 12px;line-height: 24px;">
+                <div
+                    style="mask: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11v6zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v4zm-3.5-.5h2v-3h-2v3z'/%3E%3C/svg%3E&quot;);background-color: white;width: 24px;height: 24px;margin-right: 12px;">
+                </div>Качество
+            </div>
+        </div>
+        <div
+            style="/*! width: 256px; */background-color: rgba(255,255,255,.25);height: 100%;margin: 0px 6px;box-sizing: border-box;flex: auto;">
+        </div>
+    </div>
     <button onclick="window.location.reload(true)">force reload</button>
     <button onclick="player.resize()">resize subs</button>
     <div id="player"></div>
@@ -23,13 +58,25 @@
     <script>
         var player;
         less.refresh().then(() => {
-            player = new MultitrackJS("#player", {
-                video: "//base.bronyru.info/FiM/media/s5/e9/1080.mp4",
-                audio: "//base.bronyru.info/FiM/media/s5/e9/has.mp4",
-                subtitles: "//base.bronyru.info/FiM/media/s5/e9/a2a-rus.ass",
-                title: "100 эпизод!!!",
-                preview: "//base.backup.bronyru.info/FiM/media/s5/e9/preview.webp"
-            });
+            let episodename = "School Daze, part 1"
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', `//bronyru.info/api/episodes/search?query=${encodeURI(episodename)}&size=0`, false);
+            xhr.send();
+            if (xhr.status == 200) {
+                let episodeData = JSON.parse(xhr.responseText).data[0];
+                console.log(episodeData)
+
+                player = new MultitrackJS("#player", {
+                    video: `${episodeData.path}1080.mp4`,
+                    audio: `${episodeData.path}has.mp4`,
+                    subtitles: `${episodeData.path}a2a-rus.ass`,
+                    title: episodeData.title.eng,
+                    preview: `${episodeData.path}preview.webp`
+                });
+                //this.setSubtitles(xhr.responseText);
+            } else {
+                alert(xhr.status + ': ' + xhr.statusText);
+            }
         });
     </script>
 </body>
