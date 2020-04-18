@@ -59,6 +59,8 @@ class MultitrackJS {
     }
 
     setVolume(val) {
+        if (val < 0) val = 0;
+        if (val > 1) val = 1;
         this.form.buttons.volume.setAttribute("icon", Math.ceil(val * 3))
         this.form.volumebar.selected.setAttribute("style", `width: ${100 * val}%`)
         this.form.audio.volume = val
@@ -95,6 +97,44 @@ class MultitrackJS {
                 })
                 this.resize()
             } catch (e) {}
+        }
+    }
+
+    mute(val = true) {
+        if (this.form.audio.volume != 0) {
+            this.form.audio.lastVolume = this.form.audio.volume;
+            this.setVolume(0);
+        } else if (!val) {
+            this.setVolume(this.form.audio.lastVolume);
+        }
+    }
+
+    toggleFullscreen() {
+        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            if (navigator.userAgent.search(/Safari/) > 0) this._element.removeAttribute('style');
+            this.form.buttons.fullscreen.setAttribute('name', 'fullscreenOn');
+        } else {
+            var element = this._element;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+            if (navigator.userAgent.search(/Safari/) > 0) this._element.setAttribute('style', 'width: 100%; height: 100%;');
+            this.form.buttons.fullscreen.setAttribute('name', 'fullscreenOff');
         }
     }
 
@@ -241,6 +281,83 @@ class MultitrackJS {
             this._moveEvents = [];
         })
 
+        document.addEventListener('keydown', (event) => {
+            console.log(event.code)
+            switch (event.code) {
+                case "Space":
+                case "KeyK":
+                    this.playing ? this.pause() : this.play();
+                    break;
+                case "ArrowLeft":
+                    this.rewind(-5);
+                    break;
+                case "ArrowRight":
+                    this.rewind(5);
+                    break;
+                case "KeyJ":
+                    this.rewind(-10);
+                    break;
+                case "KeyL":
+                    this.rewind(10);
+                    break;
+                case "KeyM":
+                    this.mute(false);
+                    break;
+                case "ArrowUp":
+                    if (this.form.audio.volume) this.form.audio.lastVolume = this.form.audio.volume;
+                    this.setVolume(this.form.audio.volume + .05);
+                    break;
+                case "ArrowDown":
+                    if (this.form.audio.volume) this.form.audio.lastVolume = this.form.audio.volume;
+                    this.setVolume(this.form.audio.volume - .05);
+                    break;
+                case "KeyF":
+                    this.toggleFullscreen();
+                    break;
+                case "Digit0":
+                case "Numpad0":
+                    this.setTime(this.duration * 0);
+                    break;
+                case "Digit1":
+                case "Numpad1":
+                    this.setTime(this.duration * 0.1);
+                    break;
+                case "Digit2":
+                case "Numpad2":
+                    this.setTime(this.duration * 0.2);
+                    break;
+                case "Digit3":
+                case "Numpad3":
+                    this.setTime(this.duration * 0.3);
+                    break;
+                case "Digit4":
+                case "Numpad4":
+                    this.setTime(this.duration * 0.4);
+                    break;
+                case "Digit5":
+                case "Numpad5":
+                    this.setTime(this.duration * 0.5);
+                    break;
+                case "Digit6":
+                case "Numpad6":
+                    this.setTime(this.duration * 0.6);
+                    break;
+                case "Digit7":
+                case "Numpad7":
+                    this.setTime(this.duration * 0.7);
+                    break;
+                case "Digit8":
+                case "Numpad8":
+                    this.setTime(this.duration * 0.8);
+                    break;
+                case "Digit9":
+                case "Numpad9":
+                    this.setTime(this.duration * 0.9);
+                    break;
+
+            }
+        })
+
         // Свернуто ли окно (нужно для правильной работы плеера, когда окно свернуто)
         this._pageFocused = true;
         window.addEventListener("resize", () => {
@@ -375,22 +492,30 @@ class MultitrackJS {
                     qualty: {
                         titlename: "Качество",
                         icon: "",
-                        _root: createElement('div')
+                        _root: createElement('div', {}, (el) => {
+                            el.innerText = "page1"
+                        })
                     },
                     dubs: {
                         titlename: "Озвучки",
                         icon: "",
-                        _root: createElement('div')
+                        _root: createElement('div', {}, (el) => {
+                            el.innerText = "page2"
+                        })
                     },
                     subtitles: {
                         titlename: "Субтитры",
                         icon: "",
-                        _root: createElement('div')
+                        _root: createElement('div', {}, (el) => {
+                            el.innerText = "page3"
+                        })
                     },
                     info: {
                         titlename: "Информация",
                         icon: "",
-                        _root: createElement('div')
+                        _root: createElement('div', {}, (el) => {
+                            el.innerText = "page4"
+                        })
                     }
                 },
                 tabSwitcher: {
@@ -443,32 +568,7 @@ class MultitrackJS {
                     name: 'fullscreenOn'
                 }, (el) => {
                     el.onclick = (btn) => {
-                        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-                            if (document.exitFullscreen) {
-                                document.exitFullscreen();
-                            } else if (document.mozCancelFullScreen) {
-                                document.mozCancelFullScreen();
-                            } else if (document.webkitExitFullscreen) {
-                                document.webkitExitFullscreen();
-                            } else if (document.msExitFullscreen) {
-                                document.msExitFullscreen();
-                            }
-                            if (navigator.userAgent.search(/Safari/) > 0) this._element.removeAttribute('style');
-                            el.setAttribute('name', 'fullscreenOn');
-                        } else {
-                            var element = this._element;
-                            if (element.requestFullscreen) {
-                                element.requestFullscreen();
-                            } else if (element.mozRequestFullScreen) {
-                                element.mozRequestFullScreen();
-                            } else if (element.webkitRequestFullscreen) {
-                                element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                            } else if (element.msRequestFullscreen) {
-                                element.msRequestFullscreen();
-                            }
-                            if (navigator.userAgent.search(/Safari/) > 0) this._element.setAttribute('style', 'width: 100%; height: 100%;');
-                            el.setAttribute('name', 'fullscreenOff');
-                        }
+                        this.toggleFullscreen();
                     };
                 }),
                 // Кнопка режима "Картинка-в-картинке"
@@ -497,12 +597,7 @@ class MultitrackJS {
                     icon: 3
                 }, (el) => {
                     el.addEventListener('click', () => {
-                        if (this.form.audio.volume != 0) {
-                            this.form.audio.lastVolume = this.form.audio.volume;
-                            this.setVolume(0);
-                        } else {
-                            this.setVolume(this.form.audio.lastVolume);
-                        }
+                        this.mute(false);
                     })
                 }),
                 // Открыть меню
@@ -628,8 +723,6 @@ class MultitrackJS {
                         // Получение координаты и вычисление позиции (от 0 до 1)
                         var cursorX = this._getPosInElement(el, event).x;
                         var position = this._getPosInElement(el, event).x / el.clientWidth;
-                        if (position < 0) position = 0;
-                        if (position > 1) position = 1;
                         this.setVolume(position);
                     }
                     let move = (event) => {
@@ -637,8 +730,6 @@ class MultitrackJS {
                             // Получение координаты и вычисление позиции (от 0 до 1)
                             var cursorX = this._getPosInElement(el, event).x;
                             var position = cursorX / el.clientWidth;
-                            if (position < 0) position = 0;
-                            if (position > 1) position = 1;
                             this.setVolume(position);
                         }
                     }
@@ -698,6 +789,11 @@ class MultitrackJS {
         this.form.overlays._root.appendChild(this.form.overlays.top);
         this.form.overlays._root.appendChild(this.form.overlays.bottom);
         this.form.overlays._root.appendChild(this.form.progressbar._root);
+        this.form.overlays._root.addEventListener("click", (event) => {
+            if(event.target == this.form.overlays._root){
+                this.playing ? this.pause() : this.play();
+            }
+        })
 
         this.form.settings.body.appendChild(this.form.settings.tabSwitcher._root)
         const hideAllElements = () => {
@@ -717,13 +813,13 @@ class MultitrackJS {
                     hideAllElements()
                     this.form.settings.tabs[el]._root.removeAttribute('style')
                     for (let el in this.form.settings.tabSwitcher) {
-                        if(el != "_root") this.form.settings.tabSwitcher[el].removeAttribute('selected')
+                        if (el != "_root") this.form.settings.tabSwitcher[el].removeAttribute('selected')
                     }
                     btn.setAttribute('selected', 'true')
                 }
             })
             this.form.settings.tabSwitcher._root.appendChild(this.form.settings.tabSwitcher[`btn${el}`])
-            if(btnNum == 0) this.form.settings.tabSwitcher[`btn${el}`].click()
+            if (btnNum == 0) this.form.settings.tabSwitcher[`btn${el}`].click()
             btnNum++;
         }
 
