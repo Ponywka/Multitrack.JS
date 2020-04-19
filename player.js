@@ -10,29 +10,21 @@ class MultitrackJS {
             }
         }
 
+        this._subtitlesDownloader = null
+
+        this._parameters.videos = dataArray.videos
+        this._parameters.audios = dataArray.audios
+        this._parameters.subtitles = dataArray.subtitles
+
         this._element = document.querySelector(selector);
         if (this._element) {
             this._element.setAttribute("multitrack-js", "")
             this._buildGUI()
             this._invisibleSync()
 
-            this.form.video.src = dataArray.video
-            this.form.audio.src = dataArray.audio
             this.form.title.innerText = dataArray.title
 
             if (dataArray.preview) this._parameters.frames.image = dataArray.preview
-
-            // Subtitles
-            /*if (dataArray.subtitles) {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', dataArray.subtitles, false);
-                xhr.send();
-                if (xhr.status == 200) {
-                    this.setSubtitles(xhr.responseText);
-                } else {
-                    alert(xhr.status + ': ' + xhr.statusText);
-                }
-            }*/
         } else this._logError(`Can not find "${selector}" element!`);
     }
 
@@ -70,19 +62,35 @@ class MultitrackJS {
         if (this.ass !== undefined) this.ass.resize()
     }
 
-    setVideo(link) {
+    _setVideo(link) {
+        this.form.video._servicePlay = false
         this.form.video.src = link
         this.form.video.currentTime = this.form.audio.currentTime;
         if (this.playing) this._servicePlayingVideo(true)
     }
 
-    setAudio(link) {
+    _setAudio(link) {
         let time = this.form.audio.currentTime
+        this.form.audio._servicePlay = false
         this.form.audio.src = link
         this.form.audio.currentTime = time
         if (this.playing) {
             this._servicePlayingAudio(true)
         }
+    }
+
+    downloadSubtitles(url) {
+        clearTimeout(this._subtitlesDownloader)
+        this._subtitlesDownloader = setTimeout(() => {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, false);
+            xhr.send();
+            if (xhr.status == 200) {
+                this.setSubtitles(xhr.responseText);
+            } else {
+                alert(xhr.status + ': ' + xhr.statusText);
+            }
+        })
     }
 
     setSubtitles(content = null) {
@@ -136,6 +144,17 @@ class MultitrackJS {
             if (navigator.userAgent.search(/Safari/) > 0) this._element.setAttribute('style', 'width: 100%; height: 100%;');
             this.form.buttons.fullscreen.setAttribute('name', 'fullscreenOff');
         }
+    }
+
+    toggleSettings() {
+        if (!this.form.settings.opened) {
+            this.form.overlays._root.setAttribute('style', 'display: none');
+            this.form.settings._root.removeAttribute('style');
+        } else {
+            this.form.settings._root.setAttribute('style', 'display: none');
+            this.form.overlays._root.removeAttribute('style');
+        }
+        this.form.settings.opened = !this.form.settings.opened;
     }
 
     // Служебные методы
@@ -371,6 +390,14 @@ class MultitrackJS {
             this._pageFocused = false;
         })
 
+        this._element.addEventListener('contextmenu', (event) => {
+            if (event.target.nodeName != "A") {
+                event.preventDefault();
+                this.toggleSettings()
+                return false;
+            }
+        }, false);
+
         const createElement = (tag, params = {}, actions = () => {}) => {
             var el = document.createElement(tag);
             for (var name in params) el.setAttribute(name, params[name]);
@@ -488,33 +515,28 @@ class MultitrackJS {
             }),
             // Окно настроек
             settings: {
+                opened: false,
                 tabs: {
-                    qualty: {
+                    quality: {
                         titlename: "Качество",
-                        icon: "",
-                        _root: createElement('div', {}, (el) => {
-                            el.innerText = "page1"
-                        })
+                        icon: "quality",
+                        _root: createElement('div')
                     },
                     dubs: {
                         titlename: "Озвучки",
-                        icon: "",
-                        _root: createElement('div', {}, (el) => {
-                            el.innerText = "page2"
-                        })
+                        icon: "dubs",
+                        _root: createElement('div')
                     },
                     subtitles: {
                         titlename: "Субтитры",
-                        icon: "",
-                        _root: createElement('div', {}, (el) => {
-                            el.innerText = "page3"
-                        })
+                        icon: "subtitles",
+                        _root: createElement('div')
                     },
                     info: {
                         titlename: "Информация",
-                        icon: "",
+                        icon: "info",
                         _root: createElement('div', {}, (el) => {
-                            el.innerText = "page4"
+                            el.innerHTML = "Плеер разрабатывал: <a href=\"https://vk.com/midnightponywka\" style=\"color: #95e1ff\">Midnight Ponywka</a>"
                         })
                     }
                 },
@@ -605,16 +627,14 @@ class MultitrackJS {
                     name: 'openmenu'
                 }, (el) => {
                     el.addEventListener('click', () => {
-                        this.form.overlays._root.setAttribute('style', 'display: none');
-                        this.form.settings._root.removeAttribute('style');
+                        this.toggleSettings()
                     })
                 }),
                 closemenu: createElement('button', {
                     name: 'closemenu'
                 }, (el) => {
                     el.addEventListener('click', () => {
-                        this.form.settings._root.setAttribute('style', 'display: none');
-                        this.form.overlays._root.removeAttribute('style');
+                        this.toggleSettings()
                     })
                 })
             },
@@ -790,7 +810,7 @@ class MultitrackJS {
         this.form.overlays._root.appendChild(this.form.overlays.bottom);
         this.form.overlays._root.appendChild(this.form.progressbar._root);
         this.form.overlays._root.addEventListener("click", (event) => {
-            if(event.target == this.form.overlays._root){
+            if (event.target == this.form.overlays._root) {
                 this.playing ? this.pause() : this.play();
             }
         })
@@ -808,7 +828,15 @@ class MultitrackJS {
                 name: "listEl",
                 page: el
             }, (btn) => {
-                btn.innerText += this.form.settings.tabs[el].titlename
+                btn.appendChild(createElement("div", {
+                    "name": "icon",
+                    "icon": this.form.settings.tabs[el].icon
+                }))
+                btn.appendChild(createElement("span", {}, el1 => {
+                    el1.innerText = this.form.settings.tabs[el].titlename
+                }))
+
+                //btn.innerText += this.form.settings.tabs[el].titlename
                 btn.onclick = (event) => {
                     hideAllElements()
                     this.form.settings.tabs[el]._root.removeAttribute('style')
@@ -823,7 +851,89 @@ class MultitrackJS {
             btnNum++;
         }
 
-        this.form.settings.title.innerText = "Настройки";
+        btnNum = 0;
+        for (let el of this._parameters.videos) {
+            let btn = createElement("a", {
+                name: "listEl",
+                href: el.path
+            }, (btn) => {
+                btn.appendChild(createElement("span", {}, el1 => {
+                    el1.innerText = el.name
+                }))
+                btn.onclick = (event) => {
+                    for (let el1 of this.form.settings.tabs.quality._root.querySelectorAll("*")) el1.removeAttribute('selected')
+                    btn.setAttribute('selected', 'true')
+                    this._setVideo(el.path)
+                    return false
+                }
+            })
+            this.form.settings.tabs.quality._root.appendChild(btn)
+            if (btnNum == 0) btn.click()
+            btnNum++;
+        }
+
+        btnNum = 0;
+        for (let el of this._parameters.audios) {
+            let btn = createElement("a", {
+                name: "listEl",
+                href: el.path
+            }, (btn) => {
+                btn.appendChild(createElement("span", {}, el1 => {
+                    el1.innerText = el.name
+                }))
+                btn.onclick = (event) => {
+                    for (let el1 of this.form.settings.tabs.dubs._root.querySelectorAll("*")) el1.removeAttribute('selected')
+                    btn.setAttribute('selected', 'true')
+                    this._setAudio(el.path)
+                    return false
+                }
+            })
+            this.form.settings.tabs.dubs._root.appendChild(btn)
+            if (btnNum == 0) btn.click()
+            btnNum++;
+        }
+
+        let noSubtitles = createElement("div", {
+            name: "listEl"
+        }, (btn) => {
+            btn.appendChild(createElement("span", {}, el1 => {
+                el1.innerText = "Отключено"
+            }))
+            btn.onclick = (event) => {
+                for (let el1 of this.form.settings.tabs.subtitles._root.querySelectorAll("*")) el1.removeAttribute('selected')
+                btn.setAttribute('selected', 'true')
+                this.setSubtitles()
+                return false
+            }
+        })
+        this.form.settings.tabs.subtitles._root.appendChild(noSubtitles)
+        noSubtitles.click()
+        for (let el of this._parameters.subtitles) {
+            this.form.settings.tabs.subtitles._root.appendChild(createElement("a", {
+                name: "listEl",
+                href: el.path
+            }, (btn) => {
+                btn.appendChild(createElement("span", {}, el1 => {
+                    el1.innerText = el.name
+                }))
+                btn.onclick = (event) => {
+                    try{
+                    console.log("1")
+                    for (let el1 of this.form.settings.tabs.subtitles._root.querySelectorAll("*")) el1.removeAttribute('selected')
+                    console.log("2")
+                    btn.setAttribute('selected', 'true')
+                    console.log("3")
+                    this.downloadSubtitles(el.path)
+                    console.log("4")
+                    }catch(e){
+                        console.error(e)
+                    }
+                    return false
+                }
+            }))
+        }
+
+        this.form.settings.title.innerText += "Настройки";
         this.form.settings.header.appendChild(this.form.settings.title);
         this.form.settings.header.appendChild(this.form.buttons.closemenu);
 
