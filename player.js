@@ -20,6 +20,7 @@ class MultitrackJS {
         if (this._element) {
             this._element.setAttribute("multitrack-js", "")
             this._buildGUI()
+            if (dataArray.placeholder) this.form.video.poster = dataArray.placeholder
             this._invisibleSync()
 
             this.form.title.innerText = dataArray.title
@@ -63,7 +64,8 @@ class MultitrackJS {
     }
 
     _setVideo(link) {
-        this.form.video._servicePlay = false
+        this._servicePlayingVideo(false)
+        this._changeIsWaitingVideo(true)
         this.form.video.src = link
         this.form.video.currentTime = this.form.audio.currentTime;
         if (this.playing) this._servicePlayingVideo(true)
@@ -71,12 +73,11 @@ class MultitrackJS {
 
     _setAudio(link) {
         let time = this.form.audio.currentTime
-        this.form.audio._servicePlay = false
+        this._servicePlayingAudio(false)
+        this._changeIsWaitingAudio(true)
         this.form.audio.src = link
         this.form.audio.currentTime = time
-        if (this.playing) {
-            this._servicePlayingAudio(true)
-        }
+        if (this.playing) this._servicePlayingAudio(true)
     }
 
     downloadSubtitles(url) {
@@ -128,7 +129,6 @@ class MultitrackJS {
             } else if (document.msExitFullscreen) {
                 document.msExitFullscreen();
             }
-            if (navigator.userAgent.search(/Safari/) > 0) this._element.removeAttribute('style');
             this.form.buttons.fullscreen.setAttribute('name', 'fullscreenOn');
         } else {
             var element = this._element;
@@ -141,7 +141,6 @@ class MultitrackJS {
             } else if (element.msRequestFullscreen) {
                 element.msRequestFullscreen();
             }
-            if (navigator.userAgent.search(/Safari/) > 0) this._element.setAttribute('style', 'width: 100%; height: 100%;');
             this.form.buttons.fullscreen.setAttribute('name', 'fullscreenOff');
         }
     }
@@ -182,46 +181,37 @@ class MultitrackJS {
     _servicePlayingVideo(val) {
         console.trace(`_servicePlayingVideo(${val})`);
         if (val) {
-            if (!this.form.video._servicePlay) {
-                this.form.video._ignoringAction += 1
-                this.form.video.play().then(() => {
-                    this.form.video._ignoringAction -= 1
-                })
-            }
+            this.form.video.onplaying = null;
+            this.form.video.play().then(() => {
+                this.form.video.onplaying = this.form.video._onplaying;
+            })
         } else {
-            if (this.form.video._servicePlay) {
-                this.form.video._ignoringAction += 1
-                this.form.video.pause()
-                setTimeout(() => {
-                    console.log("(video | func) -1");
-                    this.form.video._ignoringAction -= 1
-                }, 10);
-            }
+            this.form.video.onpause = null;
+            this.form.video.pause()
+            setTimeout(() => {
+                this.form.video.onpause = this.form.video._onpause;
+            }, 16)
         }
     }
 
     _servicePlayingAudio(val) {
         console.trace(`_servicePlayingAudio(${val})`);
         if (val) {
-            if (!this.form.audio._servicePlay) {
-                this.form.audio._ignoringAction += 1
-                this.form.audio.play().then(() => {
-                    console.log("(audio | func) -1");
-                    this.form.audio._ignoringAction -= 1
-                })
-            }
+            this.form.audio.onplaying = null;
+            this.form.audio.play().then(() => {
+                this.form.audio.onplaying = this.form.audio._onplaying;
+            })
         } else {
-            if (this.form.audio._servicePlay) {
-                this.form.audio._ignoringAction += 1
-                this.form.audio.pause()
-                setTimeout(() => {
-                    this.form.audio._ignoringAction -= 1
-                }, 10);
-            }
+            this.form.audio.onpause = null;
+            this.form.audio.pause()
+            setTimeout(() => {
+                this.form.audio.onpause = this.form.audio._onpause;
+            }, 16)
         }
     }
 
     _changePlaying(val) {
+        console.trace(`_changePlaying(${val})`);
         if (val) {
             if (!this.form.audio._isWaiting) this._servicePlayingVideo(true);
             if (!this.form.video._isWaiting) this._servicePlayingAudio(true);
@@ -409,28 +399,24 @@ class MultitrackJS {
         this.form = {
             // Видео
             video: createElement('video', {}, (el) => {
-                el._ignoringAction = 0;
-                el._servicePlay = false;
                 // Обработка событий плей/пауза
-                el.onplaying = () => {
+                el._onplaying = () => {
                     console.log("VIDEO PLAY")
-                    el._servicePlay = true;
-                    if (!el._ignoringAction) this._changePlaying(true)
+                    this._changePlaying(true)
                 }
-                el.onpause = () => {
+                el.onplaying = el._onplaying
+                el._onpause = (event) => {
                     console.log("VIDEO PAUSE")
-                    el._servicePlay = false;
-                    if (!el._ignoringAction) {
-                        if (el === document.pictureInPictureElement || this._pageFocused || el._leavedFromPiP) {
-                            console.log("(video) PLAYBACK IS STOP!");
-                            this._changePlaying(false);
-                            el._leavedFromPiP = false;
-                        }
+                    if (el === document.pictureInPictureElement || this._pageFocused || el._leavedFromPiP) {
+                        console.log("(video) PLAYBACK IS STOP!")
+                        this._changePlaying(false)
+                        el._leavedFromPiP = false
                     }
                 }
+                el.onpause = el._onpause
                 // Обработка событий загрузки
                 el.onwaiting = () => {
-                    this._changeIsWaitingVideo(true);
+                    this._changeIsWaitingVideo(true)
                 }
                 el.oncanplay = () => {
                     this._changeIsWaitingVideo(false)
@@ -463,22 +449,17 @@ class MultitrackJS {
             }),
             // Аудио
             audio: createElement('audio', {}, (el) => {
-                el._ignoringAction = 0;
-                el._servicePlay = false;
                 // Обработка событий плей/пауза
-                el.onplaying = () => {
+                el._onplaying = () => {
                     console.log("AUDIO PLAY")
-                    el._servicePlay = true;
-                    if (!el._ignoringAction) this._changePlaying(true)
+                    this._changePlaying(true)
                 }
-                el.onpause = () => {
+                el.onplaying = el._onplaying
+                el._onpause = () => {
                     console.log("AUDIO PAUSE")
-                    el._servicePlay = false;
-                    if (!el._ignoringAction) {
-                        console.log("(video) PLAYBACK IS STOP!");
-                        this._changePlaying(false);
-                    }
+                    this._changePlaying(false)
                 }
+                el.onpause = el._onpause;
                 // Обработка событий загрузки
                 el.onwaiting = () => {
                     this._changeIsWaitingAudio(true);
@@ -917,15 +898,15 @@ class MultitrackJS {
                     el1.innerText = el.name
                 }))
                 btn.onclick = (event) => {
-                    try{
-                    console.log("1")
-                    for (let el1 of this.form.settings.tabs.subtitles._root.querySelectorAll("*")) el1.removeAttribute('selected')
-                    console.log("2")
-                    btn.setAttribute('selected', 'true')
-                    console.log("3")
-                    this.downloadSubtitles(el.path)
-                    console.log("4")
-                    }catch(e){
+                    try {
+                        console.log("1")
+                        for (let el1 of this.form.settings.tabs.subtitles._root.querySelectorAll("*")) el1.removeAttribute('selected')
+                        console.log("2")
+                        btn.setAttribute('selected', 'true')
+                        console.log("3")
+                        this.downloadSubtitles(el.path)
+                        console.log("4")
+                    } catch (e) {
                         console.error(e)
                     }
                     return false
@@ -948,9 +929,7 @@ class MultitrackJS {
         this._element.appendChild(this.form.settings._root);
         // Информация для гиков
         setInterval(() => {
-            this.form.logger.innerText = `  Количество игнорируемых действий с видео: ${this.form.video._ignoringAction}
-                                            Количество игнорируемых действий с аудио: ${this.form.audio._ignoringAction}
-                                            Ожидание загрузки видео: ${this.form.video._isWaiting}
+            this.form.logger.innerText = `  Ожидание загрузки видео: ${this.form.video._isWaiting}
                                             Ожидание загрузки аудио: ${this.form.audio._isWaiting}
                                             Разрыв дорожек: ${Math.floor(Math.abs(this.form.video.currentTime - this.form.audio.currentTime)*1000)/1000}`;
         }, 5);

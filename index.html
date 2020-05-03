@@ -23,7 +23,7 @@
     <script>
         var player;
         less.refresh().then(() => {
-            let episodename = "Friendship is Magic, part 1"
+            let episodename = "Friendship Games"
             var xhr = new XMLHttpRequest();
             xhr.open('GET', `//bronyru.info/api/episodes/search?query=${encodeURI(episodename)}&size=0`, false);
             xhr.send();
@@ -82,7 +82,8 @@
                     videos: videos,
                     audios: audios,
                     subtitles: subtitles,
-                    preview: `frames.png`
+                    preview: `frames.png`,
+                    placeholder: `${episodeData.path}index.jpg`
                 });
             } else {
                 alert(xhr.status + ': ' + xhr.statusText);
