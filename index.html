@@ -4,11 +4,10 @@
 <head>
     <meta charset="utf-8">
     <title>Плеер для сайта ТО "Магия дружбы"</title>
-    <script src="player.js"></script>
     <link rel="stylesheet/less" type="text/css" href="player.less" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/3.9.0/less.min.js"></script>
     <style>
-        *[multitrack-js] {
+        *[application-name="multitrack-js"] {
             width: 854px;
             height: 480px;
         }
@@ -16,14 +15,13 @@
 </head>
 
 <body>
-    <button onclick="window.location.reload(true)">force reload</button>
-    <button onclick="player.resize()">resize subs</button>
     <div id="player"></div>
-    <script src="//cdn.jsdelivr.net/npm/assjs/dist/ass.js"></script>
+    <script src="multitrack.js"></script>
+    <script src="ass.js"></script>
     <script>
         var player;
         less.refresh().then(() => {
-            let episodename = "Friendship Games"
+            let episodename = "Friendship is Magic, part 1"
             var xhr = new XMLHttpRequest();
             xhr.open('GET', `//bronyru.info/api/episodes/search?query=${encodeURI(episodename)}&size=0`, false);
             xhr.send();
@@ -82,8 +80,8 @@
                     videos: videos,
                     audios: audios,
                     subtitles: subtitles,
-                    preview: `frames.png`,
-                    placeholder: `${episodeData.path}index.jpg`
+                    placeholder: `${episodeData.path}index.jpg`,
+                    title: episodeData.title.rus
                 });
             } else {
                 alert(xhr.status + ': ' + xhr.statusText);

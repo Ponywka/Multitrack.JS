@@ -5,8 +5,7 @@ class MultitrackJS {
         this._parameters = {
             frames: {
                 x: 10,
-                y: 10,
-                image: "frames.png"
+                y: 10
             }
         }
 
@@ -18,7 +17,7 @@ class MultitrackJS {
 
         this._element = document.querySelector(selector);
         if (this._element) {
-            this._element.setAttribute("multitrack-js", "")
+            this._element.setAttribute("application-name", "multitrack-js")
             this._buildGUI()
             if (dataArray.placeholder) this.form.video.poster = dataArray.placeholder
             this._invisibleSync()
@@ -290,6 +289,19 @@ class MultitrackJS {
             this._moveEvents = [];
         })
 
+        document.addEventListener("touchmove", (event) => {
+            for (let func of this._moveEvents) {
+                func.move(event.touches[0])
+            }
+        }, false)
+        document.addEventListener("touchend", (event) => {
+            for (let func of this._moveEvents) {
+                console.log(event)
+                func.release(event.changedTouches[0])
+            }
+            this._moveEvents = [];
+        }, false)
+
         document.addEventListener('keydown', (event) => {
             console.log(event.code)
             switch (event.code) {
@@ -442,7 +454,6 @@ class MultitrackJS {
                 }
                 // Остальные обработчики событий
                 el.addEventListener('leavepictureinpicture', () => {
-                    console.log("test")
                     this.form.buttons.pip.setAttribute('name', 'pipOn');
                     el._leavedFromPiP = true;
                 })
@@ -516,8 +527,27 @@ class MultitrackJS {
                     info: {
                         titlename: "Информация",
                         icon: "info",
-                        _root: createElement('div', {}, (el) => {
-                            el.innerHTML = "Плеер разрабатывал: <a href=\"https://vk.com/midnightponywka\" style=\"color: #95e1ff\">Midnight Ponywka</a>"
+                        _root: createElement('div', {
+                            'blockName': 'info'
+                        }, (el) => {
+                            el.innerHTML += '<a href="https://forms.gle/gTrxarVsZoof3CyW6" target="_blank" style="color: #ffccff; font-size: 24px">Баг-репорт</a> (перед отправкой проверьте ссылку ниже, возможно этот баг уже известен!)'
+                            let authorBlock = createElement('div', {
+                                'style': 'display: flex; padding: 12px 0px'
+                            }, (bl) => {
+                                bl.appendChild(createElement('img', {
+                                    src: "https://avatars2.githubusercontent.com/u/26777464?s=96",
+                                    width: 48,
+                                    height: 48
+                                }))
+                                bl.appendChild(createElement('div', {
+                                    'style': 'line-height: 20px; padding: 4px 8px'
+                                }, (inf) => {
+                                    inf.innerHTML += "Исходный код плеера:<br><a href=\"https://github.com/Ponywka/Multitrack.JS\" style=\"color: #ffccff\">Ponywka/Multitrack.JS</a>"
+                                    inf.innerHTML += "<!--| Да, Somepony, ты дождался его! |-->"
+                                }))
+
+                            })
+                            el.appendChild(authorBlock)
                         })
                     }
                 },
@@ -650,7 +680,9 @@ class MultitrackJS {
                     let updatePopup = (cursorX, position) => {
                         // Обновление всплывающего пузырька
                         this.form.progressbar.popup.text.innerText = this._secondsToTime(this.duration * position);
-                        this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2;
+                        if (this.form.progressbar.popup.clientWidth != 0) {
+                            this.form.progressbar.popup.halfWidth = this.form.progressbar.popup.clientWidth / 2;
+                        }
                         if (cursorX < this.form.progressbar.popup.halfWidth) {
                             this.form.progressbar.popup.setAttribute('style', `left: 0px`);
                         } else if (cursorX < (el.clientWidth - this.form.progressbar.popup.halfWidth)) {
@@ -659,25 +691,33 @@ class MultitrackJS {
                             this.form.progressbar.popup.setAttribute('style', `left: ${el.clientWidth - this.form.progressbar.popup.halfWidth * 2}px`);
                         }
                         // Отображение нужного тайла на экран
-                        var framesAll = this._parameters.frames.x * this._parameters.frames.y;
-                        var frame = Math.floor(position * framesAll);
-                        if (frame >= framesAll) frame = framesAll - 1;
-                        var offsetX = (frame % this._parameters.frames.x) / (this._parameters.frames.x - 1);
-                        var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
-                        this.form.progressbar.popup.image.setAttribute('style', `background-position: ${offsetX * 100}% ${offsetY * 100}%; background-size: ${this._parameters.frames.x * 100}%; background-image: url(${this._parameters.frames.image})`);
+                        if (this._parameters.frames.image) {
+                            var framesAll = this._parameters.frames.x * this._parameters.frames.y;
+                            var frame = Math.floor(position * framesAll);
+                            if (frame >= framesAll) frame = framesAll - 1;
+                            var offsetX = (frame % this._parameters.frames.x) / (this._parameters.frames.x - 1);
+                            var offsetY = Math.floor(frame / this._parameters.frames.x) / (this._parameters.frames.y - 1);
+                            this.form.progressbar.popup.image.setAttribute('style', `
+                                background-position: ${offsetX * 100}% ${offsetY * 100}%;
+                                background-size: ${this._parameters.frames.x * 100}%;
+                                background-image: url(${this._parameters.frames.image})`);
+
+                        } else {
+                            this.form.progressbar.popup.image.setAttribute('style', 'display: none')
+                        }
                     }
 
                     let move = (event) => {
                         // Получение координаты и вычисление позиции (от 0 до 1)
-                        var cursorX = this._getPosInElement(el, event).x;
-                        var position = cursorX / el.clientWidth;
+                        var cursor = this._getPosInElement(el, event);
+                        var position = cursor.x / el.clientWidth;
                         if (position < 0) position = 0;
                         if (position > 1) position = 1;
                         // Обновление ширины текущей позиции
                         if (this.form.progressbar.updateStyle) {
                             this.form.progressbar.played.setAttribute("style", `width: ${100 * position}%`)
                         }
-                        updatePopup(cursorX, position)
+                        updatePopup(cursor.x, position)
                     }
                     let release = (event) => {
                         this.form.progressbar.updateStyle = false;
@@ -691,17 +731,24 @@ class MultitrackJS {
                             release: release
                         })
                     })
-
-                    // Володя не забудь
-                    el.addEventListener("mouseover", (event) => {
-                        this.form.progressbar.popup.setAttribute('style', 'opacity: 0')
+                    el.addEventListener("touchstart", (event) => {
+                        this.form.progressbar.updateStyle = true
+                        Object(this._moveEvents).push({
+                            move: move,
+                            release: release
+                        })
                     })
+
                     el.addEventListener("mousemove", (event) => {
-                        var cursorX = this._getPosInElement(el, event).x;
-                        var position = cursorX / el.clientWidth;
+                        var cursor = this._getPosInElement(el, event);
+                        var position = cursor.x / el.clientWidth;
                         if (position < 0) position = 0;
                         if (position > 1) position = 1;
-                        updatePopup(cursorX, position)
+                        if (this.form.progressbar.updateStyle || cursor.y > 0) {
+                            updatePopup(cursor.x, position)
+                        } else {
+                            this.form.progressbar.popup.setAttribute('style', 'display: none')
+                        }
                     })
                     el.addEventListener("mouseout", (event) => {
                         this.form.progressbar.popup.setAttribute('style', 'display: none')
@@ -735,6 +782,14 @@ class MultitrackJS {
                         }
                     }
                     el.addEventListener("mousedown", () => {
+                        this.form.volumebar.updateStyle = true
+                        this.form.audio.lastVolume = this.form.audio.volume
+                        Object(this._moveEvents).push({
+                            move: move,
+                            release: release
+                        })
+                    })
+                    el.addEventListener("touchstart", () => {
                         this.form.volumebar.updateStyle = true
                         this.form.audio.lastVolume = this.form.audio.volume
                         Object(this._moveEvents).push({
@@ -795,6 +850,23 @@ class MultitrackJS {
                 this.playing ? this.pause() : this.play();
             }
         })
+        this.form.overlays._root.addEventListener("dblclick", (event) => {
+            this.toggleFullscreen()
+        }, false)
+        let GUItimeout;
+        this._element.addEventListener("mousemove", () => {
+            if (!this.form.settings.opened) {
+                this.form.overlays._root.removeAttribute('style')
+                clearTimeout(GUItimeout)
+                GUItimeout = setTimeout(() => {
+                    this.form.overlays._root.setAttribute('style', 'opacity: 0; cursor: none')
+                }, 3000)
+            }
+        })
+        this._element.addEventListener("mouseout", () => {
+            clearTimeout(GUItimeout)
+            this.form.overlays._root.setAttribute('style', 'opacity: 0')
+        })
 
         this.form.settings.body.appendChild(this.form.settings.tabSwitcher._root)
         const hideAllElements = () => {
@@ -834,9 +906,9 @@ class MultitrackJS {
 
         btnNum = 0;
         for (let el of this._parameters.videos) {
-            let btn = createElement("a", {
+            let btn = createElement("div", {
                 name: "listEl",
-                href: el.path
+                link: el.path
             }, (btn) => {
                 btn.appendChild(createElement("span", {}, el1 => {
                     el1.innerText = el.name
@@ -845,7 +917,6 @@ class MultitrackJS {
                     for (let el1 of this.form.settings.tabs.quality._root.querySelectorAll("*")) el1.removeAttribute('selected')
                     btn.setAttribute('selected', 'true')
                     this._setVideo(el.path)
-                    return false
                 }
             })
             this.form.settings.tabs.quality._root.appendChild(btn)
@@ -855,9 +926,9 @@ class MultitrackJS {
 
         btnNum = 0;
         for (let el of this._parameters.audios) {
-            let btn = createElement("a", {
+            let btn = createElement("div", {
                 name: "listEl",
-                href: el.path
+                link: el.path
             }, (btn) => {
                 btn.appendChild(createElement("span", {}, el1 => {
                     el1.innerText = el.name
@@ -866,7 +937,6 @@ class MultitrackJS {
                     for (let el1 of this.form.settings.tabs.dubs._root.querySelectorAll("*")) el1.removeAttribute('selected')
                     btn.setAttribute('selected', 'true')
                     this._setAudio(el.path)
-                    return false
                 }
             })
             this.form.settings.tabs.dubs._root.appendChild(btn)
@@ -890,26 +960,21 @@ class MultitrackJS {
         this.form.settings.tabs.subtitles._root.appendChild(noSubtitles)
         noSubtitles.click()
         for (let el of this._parameters.subtitles) {
-            this.form.settings.tabs.subtitles._root.appendChild(createElement("a", {
+            this.form.settings.tabs.subtitles._root.appendChild(createElement("div", {
                 name: "listEl",
-                href: el.path
+                link: el.path
             }, (btn) => {
                 btn.appendChild(createElement("span", {}, el1 => {
                     el1.innerText = el.name
                 }))
                 btn.onclick = (event) => {
                     try {
-                        console.log("1")
                         for (let el1 of this.form.settings.tabs.subtitles._root.querySelectorAll("*")) el1.removeAttribute('selected')
-                        console.log("2")
                         btn.setAttribute('selected', 'true')
-                        console.log("3")
                         this.downloadSubtitles(el.path)
-                        console.log("4")
                     } catch (e) {
                         console.error(e)
                     }
-                    return false
                 }
             }))
         }
@@ -924,14 +989,7 @@ class MultitrackJS {
         this._element.appendChild(this.form.video);
         this._element.appendChild(this.form.audio);
         this._element.appendChild(this.form.subtitles);
-        this._element.appendChild(this.form.logger);
         this._element.appendChild(this.form.overlays._root);
         this._element.appendChild(this.form.settings._root);
-        // Информация для гиков
-        setInterval(() => {
-            this.form.logger.innerText = `  Ожидание загрузки видео: ${this.form.video._isWaiting}
-                                            Ожидание загрузки аудио: ${this.form.audio._isWaiting}
-                                            Разрыв дорожек: ${Math.floor(Math.abs(this.form.video.currentTime - this.form.audio.currentTime)*1000)/1000}`;
-        }, 5);
     }
 }
