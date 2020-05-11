@@ -851,7 +851,9 @@ class MultitrackJS {
             }
         })
         this.form.overlays._root.addEventListener("dblclick", (event) => {
-            this.toggleFullscreen()
+            if (event.target === this.form.overlays._root) {
+                this.toggleFullscreen()
+            }
         }, false)
         let GUItimeout;
         this._element.addEventListener("mousemove", () => {
