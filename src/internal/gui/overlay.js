@@ -9,14 +9,14 @@ export function generateOverlay() {
             GUItimeout = setTimeout(() => {
                 this._.form.overlays._root.setAttribute(
                     "style",
-                    "opacity: 0; cursor: none"
+                    "opacity: 0; visibility: hidden; cursor: none"
                 );
             }, 3000);
         }
     });
     this._.element.addEventListener("mouseout", () => {
         clearTimeout(GUItimeout);
-        this._.form.overlays._root.setAttribute("style", "opacity: 0");
+        this._.form.overlays._root.setAttribute("style", "opacity: 0; visibility: hidden");
     });
     this._.element.addEventListener(
         "touchmove",
