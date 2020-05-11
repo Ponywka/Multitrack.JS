@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Плеер для сайта ТО "Магия дружбы"</title>
+    <script src="main.js"></script>
+    <style>
+        *[application-name="multitrack-js"] {
+            width: 854px;
+            height: 480px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="player"></div>
+    <script>
+        var player = new MultitrackJS("#player", {
+            videos: [{
+                name: "1080p",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/1080.mp4"
+            }, {
+                name: "720p",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/720.mp4"
+            }, {
+                name: "480p",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/480.mp4"
+            }, {
+                name: "360p",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/360.mp4"
+            }, {
+                name: "240p",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/240.mp4"
+            }, {
+                name: "144p",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/144.mp4"
+            }],
+            audios: [{
+                name: 'Карусель (ЗАО "Первый канал Всемирная сеть")',
+                path: "//base.bronyru.info/EG/media/OriginalMovie/www.mp4"
+            }, {
+                name: "Gala Voices",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/gal.mp4"
+            }, {
+                name: "Трина Дубовицкая",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/tri.mp4"
+            }, {
+                name: "Doublezett Studio (Agent DieGo)",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/die.mp4"
+            }, {
+                name: 'Украинская (ПлюсПлюс, студия "Мастер Видео")',
+                path: "//base.bronyru.info/EG/media/OriginalMovie/mav.mp4"
+            }, {
+                name: "Оригинал",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/has.mp4"
+            }],
+            subtitles: [{
+                name: "RUS anon2anon",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/a2a-rus.ass"
+            }, {
+                name: "ENG anon2anon",
+                path: "//base.bronyru.info/EG/media/OriginalMovie/a2a-eng.ass"
+            }],
+            placeholder: "//base.bronyru.info/EG/media/OriginalMovie/index.jpg",
+            title: "Equestria Girls"
+        });
+    </script>
+</body>
+
+</html>

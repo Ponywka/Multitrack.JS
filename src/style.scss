@@ -1,5 +1,13 @@
 *[application-name="multitrack-js"] {
-    font-family: -apple-system, BlinkMacSystemFont, Roboto, Open Sans, Helvetica Neue, "Noto Sans Armenian", "Noto Sans Bengali", "Noto Sans Cherokee", "Noto Sans Devanagari", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Hebrew", "Noto Sans Kannada", "Noto Sans Khmer", "Noto Sans Lao", "Noto Sans Osmanya", "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Thai", sans-serif;
+    width: 640px;
+    height: 360px;
+
+    font-family: -apple-system, BlinkMacSystemFont, Roboto, Open Sans,
+        Helvetica Neue, "Noto Sans Armenian", "Noto Sans Bengali",
+        "Noto Sans Cherokee", "Noto Sans Devanagari", "Noto Sans Ethiopic",
+        "Noto Sans Georgian", "Noto Sans Hebrew", "Noto Sans Kannada",
+        "Noto Sans Khmer", "Noto Sans Lao", "Noto Sans Osmanya",
+        "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Thai", sans-serif;
     position: relative;
     background: black;
     color: white;
@@ -16,14 +24,6 @@
         height: 100%;
     }
 
-    div[name="logger"] {
-        position: absolute;
-        top: 54px;
-        left: 10px;
-        padding: 10px;
-        background-color: rgba(0, 0, 0, .5);
-    }
-
     div[name="settings"] {
         position: absolute;
         top: 0;
@@ -32,11 +32,11 @@
         max-height: 480px;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, .75);
+        background-color: rgba(0, 0, 0, 0.75);
 
         div[name="settingsHeader"] {
             display: flex;
-            background: rgba(255, 255, 255, .9);
+            background: rgba(255, 255, 255, 0.9);
             color: black;
             padding: 4px;
             position: absolute;
@@ -61,9 +61,9 @@
             box-sizing: border-box;
             display: flex;
 
-            &>div {
+            & > div {
                 flex: auto;
-                background-color: rgba(255, 255, 255, .2);
+                background-color: rgba(255, 255, 255, 0.2);
                 height: 100%;
                 margin: 0px 6px;
                 box-sizing: border-box;
@@ -94,19 +94,27 @@
                 }
 
                 div[icon="quality"] {
-                    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11v6zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v4zm-3.5-.5h2v-3h-2v3z'/%3E%3C/svg%3E");
+                    $icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11v6zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v4zm-3.5-.5h2v-3h-2v3z'/%3E%3C/svg%3E");
+                    -webkit-mask: $icon;
+                    mask: $icon;
                 }
 
                 div[icon="dubs"] {
-                    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Ccircle cx='9' cy='9' r='4'/%3E%3Cpath d='M9 15c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm7.76-9.64l-1.68 1.69c.84 1.18.84 2.71 0 3.89l1.68 1.69c2.02-2.02 2.02-5.07 0-7.27zM20.07 2l-1.63 1.63c2.77 3.02 2.77 7.56 0 10.74L20.07 16c3.9-3.89 3.91-9.95 0-14z'/%3E%3C/svg%3E");
+                    $icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Ccircle cx='9' cy='9' r='4'/%3E%3Cpath d='M9 15c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm7.76-9.64l-1.68 1.69c.84 1.18.84 2.71 0 3.89l1.68 1.69c2.02-2.02 2.02-5.07 0-7.27zM20.07 2l-1.63 1.63c2.77 3.02 2.77 7.56 0 10.74L20.07 16c3.9-3.89 3.91-9.95 0-14z'/%3E%3C/svg%3E");
+                    -webkit-mask: $icon;
+                    mask: $icon;
                 }
 
                 div[icon="subtitles"] {
-                    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 12h4v2H4v-2zm10 6H4v-2h10v2zm6 0h-4v-2h4v2zm0-4H10v-2h10v2z'/%3E%3C/svg%3E");
+                    $icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 12h4v2H4v-2zm10 6H4v-2h10v2zm6 0h-4v-2h4v2zm0-4H10v-2h10v2z'/%3E%3C/svg%3E");
+                    -webkit-mask: $icon;
+                    mask: $icon;
                 }
 
                 div[icon="info"] {
-                    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+                    $icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+                    -webkit-mask: $icon;
+                    mask: $icon;
                 }
 
                 &[selected="true"] {
@@ -119,7 +127,7 @@
                 }
             }
 
-            div[blockname="info"]{
+            div[blockname="info"] {
                 padding: 12px;
             }
         }
@@ -131,8 +139,23 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0px, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.375), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0) 96px), linear-gradient(to bottom, rgba(0, 0, 0, 0.75) 0px, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.375), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0) 96px);
-        transition: .3s opacity;
+        background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.75) 0px,
+                rgba(0, 0, 0, 0.6),
+                rgba(0, 0, 0, 0.375),
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0) 96px
+            ),
+            linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.75) 0px,
+                rgba(0, 0, 0, 0.6),
+                rgba(0, 0, 0, 0.375),
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0) 96px
+            );
+        transition: 0.3s opacity;
 
         div[name="progress-all"] {
             position: absolute;
@@ -151,7 +174,7 @@
                 bottom: 16px;
                 padding: 2px;
                 border-radius: 2px;
-                background-color: rgba(0, 0, 0, .5);
+                background-color: rgba(0, 0, 0, 0.5);
 
                 div[name="timeline-popup-image"] {
                     width: 128px;
@@ -203,11 +226,11 @@
             }
 
             div[name="progress-line"] {
-                background-color: rgba(255, 255, 255, .25);
+                background-color: rgba(255, 255, 255, 0.25);
             }
 
             canvas[name="progress-loaded"] {
-                opacity: .5;
+                opacity: 0.5;
             }
 
             div[name="progress-played"] {
@@ -234,7 +257,7 @@
             }
 
             div[name="volumebar-line"] {
-                background-color: rgba(255, 255, 255, .25);
+                background-color: rgba(255, 255, 255, 0.25);
             }
 
             div[name="volumebar-selected"] {

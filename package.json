@@ -1,0 +1,32 @@
+{
+  "name": "multitrack.js",
+  "version": "1.0.0",
+  "description": "Web-player with support playing multiple tracks",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx webpack",
+    "build_dev": "npx webpack --config webpack.config.development.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ponywka/Multitrack.JS.git"
+  },
+  "author": "Ponywka",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Ponywka/Multitrack.JS/issues"
+  },
+  "homepage": "https://github.com/Ponywka/Multitrack.JS#readme",
+  "devDependencies": {
+    "css-loader": "^3.5.3",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "assjs": "0.0.11"
+  }
+}
