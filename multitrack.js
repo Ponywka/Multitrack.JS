@@ -859,13 +859,13 @@ class MultitrackJS {
                 this.form.overlays._root.removeAttribute('style')
                 clearTimeout(GUItimeout)
                 GUItimeout = setTimeout(() => {
-                    this.form.overlays._root.setAttribute('style', 'opacity: 0; cursor: none')
+                    this.form.overlays._root.setAttribute('style', 'opacity: 0; visibility: hidden; cursor: none')
                 }, 3000)
             }
         })
         this._element.addEventListener("mouseout", () => {
             clearTimeout(GUItimeout)
-            this.form.overlays._root.setAttribute('style', 'opacity: 0')
+            this.form.overlays._root.setAttribute('style', 'opacity: 0; visibility: hidden')
         })
 
         this.form.settings.body.appendChild(this.form.settings.tabSwitcher._root)
