@@ -112,27 +112,16 @@ export function generateButtons() {
             }
         ),
         // Открыть меню
-        openmenu: createElement(
+        menu: createElement(
             "button",
             {
-                name: "openmenu",
+                name: "menu",
             },
             (el) => {
                 el.addEventListener("click", () => {
                     toggleSettings.call(this);
                 });
             }
-        ),
-        closemenu: createElement(
-            "button",
-            {
-                name: "closemenu",
-            },
-            (el) => {
-                el.addEventListener("click", () => {
-                    toggleSettings.call(this);
-                });
-            }
-        ),
+        )
     };
 }

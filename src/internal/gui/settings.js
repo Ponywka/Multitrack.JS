@@ -1,13 +1,20 @@
 import { createElement, logError } from "../utils";
 import { setVideo, setAudio, setSubtitles } from "../trackSwitcher";
 
+function resetMenu() {
+    this._.form.settings.title.innerText = "Настройки";
+    for(let el in this._.form.settings.menu){
+        this._.form.settings.menu[el].content.setAttribute("style", "display: none");
+    }
+    this._.form.settings.menuSwitcher._root.removeAttribute("style");
+};
+
 export function toggleSettings() {
     if (!this._.form.settings.opened) {
-        this._.form.overlays._root.setAttribute("style", "display: none");
-        this._.form.settings._root.removeAttribute("style");
+        resetMenu.call(this)
+        this._.form.settings._root.setAttribute("style", "display: block");
     } else {
-        this._.form.settings._root.setAttribute("style", "display: none");
-        this._.form.overlays._root.removeAttribute("style");
+        this._.form.settings._root.removeAttribute("style");
     }
     this._.form.settings.opened = !this._.form.settings.opened;
 }
@@ -15,27 +22,22 @@ export function toggleSettings() {
 export function generateSettings() {
     this._.form.settings = {
         opened: false,
-        tabs: {
+        menu: {
             quality: {
                 titlename: "Качество",
-                icon: "quality",
-                _root: createElement("div"),
+                content: createElement("div"),
             },
             dubs: {
                 titlename: "Озвучки",
-                icon: "dubs",
-                _root: createElement("div"),
+                content: createElement("div"),
             },
             subtitles: {
                 titlename: "Субтитры",
-                icon: "subtitles",
-                _root: createElement("div"),
+                content: createElement("div"),
             },
             info: {
-                titlename: "Информация",
-                icon: "info",
-                _root: createElement(
-                    "div",
+                titlename: "Информация о плеере",
+                content: createElement("div",
                     {
                         blockName: "info",
                     },
@@ -78,11 +80,6 @@ export function generateSettings() {
                 ),
             },
         },
-        tabSwitcher: {
-            _root: createElement("div", {
-                name: "tabs",
-            }),
-        },
         title: createElement("div", {
             name: "title",
         }),
@@ -92,70 +89,48 @@ export function generateSettings() {
         body: createElement("div", {
             name: "settingsBody",
         }),
+        menuSwitcher: {
+            _root: createElement("div")
+        },
         _root: createElement("div", {
-            name: "settings",
-            style: "display: none",
-        }),
+            name: "settings"
+        })
     };
+
     this._.form.settings.body.appendChild(
-        this._.form.settings.tabSwitcher._root
+        this._.form.settings.menuSwitcher._root
     );
-    const hideAllElements = () => {
-        for (let page in this._.form.settings.tabs) {
-            this._.form.settings.tabs[page]._root.setAttribute(
-                "style",
-                "display: none"
-            );
-        }
-    };
-    let btnNum = 0;
-    for (let el in this._.form.settings.tabs) {
+
+    for (let el in this._.form.settings.menu) {
         this._.form.settings.body.appendChild(
-            this._.form.settings.tabs[el]._root
+            this._.form.settings.menu[el].content
         );
-        this._.form.settings.tabSwitcher[`btn${el}`] = createElement(
+        this._.form.settings.menuSwitcher[`btn${el}`] = createElement(
             "div",
             {
                 name: "listEl",
                 page: el,
             },
             (btn) => {
-                btn.appendChild(
-                    createElement("div", {
-                        name: "icon",
-                        icon: this._.form.settings.tabs[el].icon,
-                    })
-                );
-                btn.appendChild(
-                    createElement("span", {}, (el1) => {
-                        el1.innerText = this._.form.settings.tabs[el].titlename;
-                    })
-                );
+                btn.innerText = this._.form.settings.menu[el].titlename;
 
-                //btn.innerText += this._.form.settings.tabs[el].titlename
                 btn.onclick = (event) => {
-                    hideAllElements();
-                    this._.form.settings.tabs[el]._root.removeAttribute(
+                    resetMenu.call(this);
+                    this._.form.settings.title.innerText = this._.form.settings.menu[el].titlename;
+                    this._.form.settings.menu[el].content.removeAttribute(
                         "style"
                     );
-                    for (let el in this._.form.settings.tabSwitcher) {
-                        if (el != "_root")
-                            this._.form.settings.tabSwitcher[
-                                el
-                            ].removeAttribute("selected");
-                    }
-                    btn.setAttribute("selected", "true");
+                    this._.form.settings.menuSwitcher._root.setAttribute('style', 'display: none;')
                 };
             }
         );
-        this._.form.settings.tabSwitcher._root.appendChild(
-            this._.form.settings.tabSwitcher[`btn${el}`]
+        this._.form.settings.menuSwitcher._root.appendChild(
+            this._.form.settings.menuSwitcher[`btn${el}`]
         );
-        if (btnNum == 0) this._.form.settings.tabSwitcher[`btn${el}`].click();
-        btnNum++;
     }
 
-    btnNum = 0;
+    resetMenu.call(this);
+
     for (let el of this._.videos) {
         let btn = createElement(
             "div",
@@ -164,27 +139,17 @@ export function generateSettings() {
                 link: el.path,
             },
             (btn) => {
-                btn.appendChild(
-                    createElement("span", {}, (el1) => {
-                        el1.innerText = el.name;
-                    })
-                );
+                btn.innerText = el.name;
                 btn.onclick = (event) => {
-                    for (let el1 of this._.form.settings.tabs.quality._root.querySelectorAll(
-                        "*"
-                    ))
-                        el1.removeAttribute("selected");
+                    for (let el1 of this._.form.settings.menu.quality.content.querySelectorAll("*")) el1.removeAttribute("selected");
                     btn.setAttribute("selected", "true");
                     setVideo.call(this, el.path);
                 };
             }
         );
-        this._.form.settings.tabs.quality._root.appendChild(btn);
-        if (btnNum == 0) btn.click();
-        btnNum++;
+        this._.form.settings.menu.quality.content.appendChild(btn);
     }
 
-    btnNum = 0;
     for (let el of this._.audios) {
         let btn = createElement(
             "div",
@@ -193,85 +158,54 @@ export function generateSettings() {
                 link: el.path,
             },
             (btn) => {
-                btn.appendChild(
-                    createElement("span", {}, (el1) => {
-                        el1.innerText = el.name;
-                    })
-                );
+                btn.innerText = el.name;
                 btn.onclick = (event) => {
-                    for (let el1 of this._.form.settings.tabs.dubs._root.querySelectorAll(
-                        "*"
-                    ))
-                        el1.removeAttribute("selected");
+                    for (let el1 of this._.form.settings.menu.dubs.content.querySelectorAll("*")) el1.removeAttribute("selected");
                     btn.setAttribute("selected", "true");
                     setAudio.call(this, el.path);
                 };
             }
         );
-        this._.form.settings.tabs.dubs._root.appendChild(btn);
-        if (btnNum == 0) btn.click();
-        btnNum++;
+        this._.form.settings.menu.dubs.content.appendChild(btn);
     }
 
     let noSubtitles = createElement(
         "div",
         {
-            name: "listEl",
+            name: "listEl"
         },
         (btn) => {
-            btn.appendChild(
-                createElement("span", {}, (el1) => {
-                    el1.innerText = "Отключено";
-                })
-            );
+            btn.innerText = "Отключено";
             btn.onclick = (event) => {
-                for (let el1 of this._.form.settings.tabs.subtitles._root.querySelectorAll(
-                    "*"
-                ))
-                    el1.removeAttribute("selected");
+                for (let el1 of this._.form.settings.menu.subtitles.content.querySelectorAll("*")) el1.removeAttribute("selected");
                 btn.setAttribute("selected", "true");
                 setSubtitles.call(this);
-                return false;
             };
         }
     );
-    this._.form.settings.tabs.subtitles._root.appendChild(noSubtitles);
+    this._.form.settings.menu.subtitles.content.appendChild(noSubtitles);
     noSubtitles.click();
+
     for (let el of this._.subtitles) {
-        this._.form.settings.tabs.subtitles._root.appendChild(
-            createElement(
-                "div",
-                {
-                    name: "listEl",
-                    link: el.path,
-                },
-                (btn) => {
-                    btn.appendChild(
-                        createElement("span", {}, (el1) => {
-                            el1.innerText = el.name;
-                        })
-                    );
-                    btn.onclick = (event) => {
-                        try {
-                            for (let el1 of this._.form.settings.tabs.subtitles._root.querySelectorAll(
-                                "*"
-                            ))
-                                el1.removeAttribute("selected");
-                            btn.setAttribute("selected", "true");
-                            setSubtitles.call(this, el.path);
-                        } catch (e) {
-                            logError.call(this, "Can'y download subtitles");
-                        }
-                    };
-                }
-            )
+        let btn = createElement(
+            "div",
+            {
+                name: "listEl",
+                link: el.path,
+            },
+            (btn) => {
+                btn.innerText = el.name;
+                btn.onclick = (event) => {
+                    for (let el1 of this._.form.settings.menu.subtitles.content.querySelectorAll("*")) el1.removeAttribute("selected");
+                    btn.setAttribute("selected", "true");
+                    setSubtitles.call(this, el.path);
+                };
+            }
         );
+        this._.form.settings.menu.subtitles.content.appendChild(btn);
     }
 
-    this._.form.settings.title.innerText += "Настройки";
     this._.form.settings.header.appendChild(this._.form.settings.title);
-    this._.form.settings.header.appendChild(this._.form.buttons.closemenu);
-
     this._.form.settings._root.appendChild(this._.form.settings.header);
     this._.form.settings._root.appendChild(this._.form.settings.body);
 }

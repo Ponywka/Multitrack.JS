@@ -36,7 +36,7 @@ export function gestures() {
     this._.form.overlays._root.addEventListener(
         "dblclick",
         (event) => {
-            if (event.target === event.currentTarget) {
+            if (event.target === this._.form.overlays._root) {
                 toggleFullscreen.call(this);
             }
         },
