@@ -131,6 +131,9 @@ export function generateSettings() {
 
     resetMenu.call(this);
 
+    let firstBtn;
+
+    firstBtn = true;
     for (let el of this._.videos) {
         let btn = createElement(
             "div",
@@ -148,8 +151,13 @@ export function generateSettings() {
             }
         );
         this._.form.settings.menu.quality.content.appendChild(btn);
+        if(firstBtn){
+            btn.click();
+            firstBtn=false;
+        }
     }
 
+    firstBtn = true;
     for (let el of this._.audios) {
         let btn = createElement(
             "div",
@@ -167,6 +175,10 @@ export function generateSettings() {
             }
         );
         this._.form.settings.menu.dubs.content.appendChild(btn);
+        if(firstBtn){
+            btn.click();
+            firstBtn=false;
+        }
     }
 
     let noSubtitles = createElement(
