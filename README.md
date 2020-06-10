@@ -1,5 +1,7 @@
 # Multitrack.JS
 
+# Внимание! Плеер будет переписан с нуля через некоторое время. Прошу не кидать Pull request'ы
+
 ![](https://raw.githubusercontent.com/Ponywka/multitrack.js/master/screenshot.png)
 
 ### Что нужно реализовать (выделенное - в разработке)
