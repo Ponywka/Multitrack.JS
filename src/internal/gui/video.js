@@ -1,5 +1,5 @@
 import { createElement, secondsToTime } from "../utils";
-import { changeIsWaitingVideo, changePlaying } from "../playback";
+import { changeIsWaitingVideo, changePlaying, setTime } from "../playback";
 
 export function generateVideo() {
     this._.form.video = createElement("video", {}, (el) => {
@@ -8,12 +8,25 @@ export function generateVideo() {
             changePlaying.call(this, true);
         };
         el.onplaying = el._onplaying;
-        el._onpause = (event) => {
-            if (el === document.pictureInPictureElement || this._.pageFocused) {
+
+        el._onpause = () => {
+            if (el === document.pictureInPictureElement || document.hasFocus()) {
                 changePlaying.call(this, false);
             }
         };
         el.onpause = el._onpause;
+
+        el._onseeking = (event) => {
+            setTime.call(this, event.target.currentTime, true);
+        }
+        el.onseeking = el._onseeking;
+
+        el.mjs_setTime = (val) => {
+            el.onseeking = null;
+            el.currentTime = val;
+            el.onseeking = el._onseeking;
+        }
+
         // Обработка событий загрузки
         el.onwaiting = () => {
             changeIsWaitingVideo.call(this, true);

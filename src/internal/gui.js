@@ -1,7 +1,6 @@
 import { createElement } from "./utils";
 import { hotkeys } from "./gui/hotkeys";
 import { gestures } from "./gui/gestures";
-import { windowFocus } from "./gui/windowFocus";
 import { generateVideo } from "./gui/video";
 import { generateAudio } from "./gui/audio";
 import { generateVolume } from "./gui/volume";
@@ -47,5 +46,4 @@ export function gui() {
 
     gestures.call(this);
     hotkeys.call(this);
-    windowFocus.call(this);
 }

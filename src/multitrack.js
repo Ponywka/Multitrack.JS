@@ -1,6 +1,6 @@
 import "./style.scss";
 import { init } from "./internal/init";
-import { play, pause, rewind, setTime } from "./internal/playback";
+import { play, pause, rewind, setTime, synchronize } from "./internal/playback";
 //import { ASS } from 'assjs'
 
 export default class {
@@ -31,5 +31,9 @@ export default class {
 
     resize() {
         if (this._.ass !== undefined) this._.ass.resize();
+    }
+
+    sync(){
+        synchronize.call(this);
     }
 }

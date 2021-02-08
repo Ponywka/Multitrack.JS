@@ -17,7 +17,7 @@ export function setVideo(link) {
     servicePlayingVideo.call(this, false);
     changeIsWaitingVideo.call(this, true);
     this._.form.video.src = link;
-    this._.form.video.currentTime = this._.form.audio.currentTime;
+    this._.form.video.mjs_setTime(this._.form.audio.currentTime);
     if (this.playing) servicePlayingVideo.call(this, true);
 }
 
@@ -38,10 +38,10 @@ export function setSubtitles(url) {
     }
     if (url) {
         this._.subtitlesDownloader = setTimeout(() => {
-            var xhr = new XMLHttpRequest();
+            let xhr = new XMLHttpRequest();
             xhr.open("GET", url, false);
             xhr.send();
-            if (xhr.status == 200) {
+            if (xhr.status === 200) {
                 try {
                     this._.ass = new ASS(xhr.responseText, this._.form.video, {
                         container: this._.form.subtitles,
