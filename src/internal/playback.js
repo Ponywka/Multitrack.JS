@@ -1,50 +1,36 @@
 export function synchronize() {
     let video = this._.form.video;
     let audio = this._.form.audio;
+    let playbackSpeed = this._.playbackSpeed;
+    let diff = video.currentTime - audio.currentTime;
 
+    audio.playbackRate = playbackSpeed;
+    video.mjs_setRate(playbackSpeed);
     if(video.syncTimeout) clearTimeout(video.syncTimeout);
+    video.syncTimeout = null
 
-    let diff = audio.currentTime - video.currentTime;
-
-    console.log(`Difference: `, diff);
-    let absDiff = Math.abs(diff);
-    if (this.playing && absDiff > 1 / 60) {
-        if (absDiff < 3) {
-            let scale = absDiff + 1;
-            video.playbackRate = (diff > 0) ? scale : 1 / scale;
+    if (this.playing && Math.abs(diff) > 1 / 60) {
+        let scale = playbackSpeed - diff;
+        if(0.25 <= scale && scale <= 4) {
+            video.mjs_setRate(scale);
             video.syncTimeout = setTimeout(() => {
-                this._.form.video.playbackRate = 1;
+                video.mjs_setRate(playbackSpeed);
+                video.syncTimeout = null;
             }, 1000);
-        } else {
-            video.mjs_setTime(this._.form.audio.currentTime);
+        }else{
+            video.mjs_setTime(audio.currentTime);
         }
-    }else{
-        console.log('Not need sync');
-    }
-}
-
-function servicePlaying(el, val, rootClass){
-    if (val) {
-        el.onplaying = null;
-        el.play().then(() => {
-            el.onplaying = el._onplaying;
-            synchronize.call(rootClass);
-        });
-    } else {
-        el.onpause = null;
-        el.pause();
-        setTimeout(() => {
-            el.onpause = el._onpause;
-        }, 16);
     }
 }
 
 export function servicePlayingVideo(val) {
-    servicePlaying(this._.form.video, val, this);
+    let el = this._.form.video;
+    (val) ? el.mjs_play() : el.mjs_pause();
 }
 
 export function servicePlayingAudio(val) {
-    servicePlaying(this._.form.audio, val, this);
+    let el = this._.form.audio;
+    (val) ? el.mjs_play() : el.mjs_pause();
 }
 
 export function changeIsWaitingVideo(val) {
@@ -96,4 +82,11 @@ export function rewind(val) {
 export function setTime(val, isVideo = false) {
     this._.form.audio.currentTime = val;
     if (!isVideo) this._.form.video.mjs_setTime(val);
+}
+
+export function setSpeed(val) {
+    if(val < 0.25) val = 0.25;
+    if(val > 2) val = 2;
+    this._.playbackSpeed = val;
+    synchronize.call(this);
 }

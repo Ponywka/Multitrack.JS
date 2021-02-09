@@ -47,10 +47,7 @@ export function generateOverlay() {
             style: "flex: auto",
         })
     );
-    if (
-        "pictureInPictureEnabled" in document &&
-        !(navigator.userAgent.search(/YaBrowser/) > 0)
-    ) {
+    if ("pictureInPictureEnabled" in document) {
         this._.form.overlays.bottom.appendChild(this._.form.buttons.pip);
     }
     this._.form.overlays.bottom.appendChild(this._.form.buttons.menu);

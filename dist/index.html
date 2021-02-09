@@ -8,13 +8,15 @@
     <style>
         *[application-name="multitrack-js"] {
             width: 854px;
-            height: 480px;
+            height: 180px;
         }
     </style>
 </head>
 
 <body>
     <div id="player"></div>
+    <div id="diff"></div>
+    <button onclick="player.sync()">Sync now</button>
     <script>
         var player = new MultitrackJS("#player", {
             videos: [{
@@ -63,8 +65,19 @@
                 path: "//base.bronyru.info/EG/media/OriginalMovie/a2a-eng.ass"
             }],
             placeholder: "//base.bronyru.info/EG/media/OriginalMovie/index.jpg",
+            preview: "//base.bronyru.info/EG/media/OriginalMovie/preview.webp",
             title: "Equestria Girls"
         });
+
+        var diff = document.querySelector("#diff");
+        var diffInterval = setInterval(()=>{
+            diff.innerText = "V-A: " + (player._.form.video.currentTime - player._.form.audio.currentTime);
+            if(player._.form.video.syncTimeout != null){
+                diff.style = "background-color: black; color: white;";
+            }else{
+                diff.style = "";
+            }
+        }, 100);
     </script>
 </body>
 

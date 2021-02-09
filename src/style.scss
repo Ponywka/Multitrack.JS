@@ -35,7 +35,7 @@
         right: 8px;
         max-width: 300px;
         width: 100%;
-        max-height: calc(100% - 128px);
+        max-height: calc(100% - 64px);
         background-color: rgba(0, 0, 0, 0.75);
         overflow: hidden;
 
@@ -49,6 +49,17 @@
             height: 32px;
             overflow: hidden;
             box-sizing: border-box;
+        }
+
+        div[name="settingsHeader"][showicon="true"]::before {
+            content: "<-";
+            display: block;
+            font-weight: bold;
+            margin-right: 1em;
+        }
+
+        div[name="settingsHeader"][showicon="true"] {
+            cursor: pointer;
         }
 
         div[name="settingsBody"] {

@@ -1,5 +1,5 @@
 import { createElement, secondsToTime } from "../utils";
-import { changeIsWaitingVideo, changePlaying, setTime } from "../playback";
+import { changeIsWaitingVideo, changePlaying, setTime, synchronize, setSpeed } from "../playback";
 
 export function generateVideo() {
     this._.form.video = createElement("video", {}, (el) => {
@@ -8,6 +8,13 @@ export function generateVideo() {
             changePlaying.call(this, true);
         };
         el.onplaying = el._onplaying;
+        el.mjs_play = () => {
+            el.onplaying = null;
+            el.play().then(() => {
+                el.onplaying = el._onplaying;
+                synchronize.call(this);
+            });
+        }
 
         el._onpause = () => {
             if (el === document.pictureInPictureElement || document.hasFocus()) {
@@ -15,16 +22,35 @@ export function generateVideo() {
             }
         };
         el.onpause = el._onpause;
+        el.mjs_pause = () => {
+            el.onpause = null;
+            el.pause();
+            setTimeout(() => {
+                el.onpause = el._onpause;
+            }, 16);
+        }
 
         el._onseeking = (event) => {
             setTime.call(this, event.target.currentTime, true);
         }
         el.onseeking = el._onseeking;
-
         el.mjs_setTime = (val) => {
             el.onseeking = null;
             el.currentTime = val;
             el.onseeking = el._onseeking;
+        }
+
+        el._onratechange = () => {
+            setSpeed.call(this, el.playbackRate);
+        }
+        el.onratechange = el._onratechange;
+        el.mjs_setRate = (val) => {
+            console.log("Rate changed to: ", val);
+            el.onratechange = null;
+            el.playbackRate = val;
+            setTimeout(() => {
+                el.onratechange = el._onratechange;
+            }, 16);
         }
 
         // Обработка событий загрузки
@@ -33,12 +59,6 @@ export function generateVideo() {
         };
         el.oncanplay = () => {
             changeIsWaitingVideo.call(this, false);
-        };
-        el.onloadedmetadata = () => {
-            this.duration = el.duration;
-            this._.form.time.innerText = `${secondsToTime(
-                this._.form.audio.currentTime
-            )} / ${secondsToTime(this.duration)}`;
         };
         el.onprogress = () => {
             var element = this._.form.progressbar.loaded;

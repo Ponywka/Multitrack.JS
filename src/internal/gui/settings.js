@@ -1,8 +1,11 @@
 import { createElement, logError } from "../utils";
 import { setVideo, setAudio, setSubtitles } from "../trackSwitcher";
+import { setSpeed } from "../playback";
+
 
 function resetMenu() {
     this._.form.settings.title.innerText = "Настройки";
+    this._.form.settings.header.setAttribute("showIcon", null);
     for(let el in this._.form.settings.menu){
         this._.form.settings.menu[el].content.setAttribute("style", "display: none");
     }
@@ -33,6 +36,10 @@ export function generateSettings() {
             },
             subtitles: {
                 titlename: "Субтитры",
+                content: createElement("div"),
+            },
+            playbackSpeed: {
+                titlename: "Скорость воспроизведения",
                 content: createElement("div"),
             },
             info: {
@@ -85,6 +92,10 @@ export function generateSettings() {
         }),
         header: createElement("div", {
             name: "settingsHeader",
+        }, (el) => {
+            el.addEventListener("click", () => {
+                resetMenu.call(this);
+            });
         }),
         body: createElement("div", {
             name: "settingsBody",
@@ -116,6 +127,7 @@ export function generateSettings() {
 
                 btn.onclick = (event) => {
                     resetMenu.call(this);
+                    this._.form.settings.header.setAttribute("showIcon", "true");
                     this._.form.settings.title.innerText = this._.form.settings.menu[el].titlename;
                     this._.form.settings.menu[el].content.removeAttribute(
                         "style"
@@ -215,6 +227,25 @@ export function generateSettings() {
             }
         );
         this._.form.settings.menu.subtitles.content.appendChild(btn);
+    }
+
+    for (let speed of [0.5, 1, 1.5, 2]) {
+        let btn = createElement(
+            "div",
+            {
+                name: "listEl",
+                speed: speed,
+            },
+            (btn) => {
+                btn.innerText = speed + "x";
+                btn.onclick = (event) => {
+                    for (let el1 of this._.form.settings.menu.playbackSpeed.content.querySelectorAll("*")) el1.removeAttribute("selected");
+                    btn.setAttribute("selected", "true");
+                    setSpeed.call(this, speed);
+                };
+            }
+        );
+        this._.form.settings.menu.playbackSpeed.content.appendChild(btn);
     }
 
     this._.form.settings.header.appendChild(this._.form.settings.title);
