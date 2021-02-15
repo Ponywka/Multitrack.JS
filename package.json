@@ -24,6 +24,7 @@
     "@babel/preset-env": "^7.9.6",
     "babel-loader": "^8.1.0",
     "css-loader": "^3.5.3",
+    "prettier": "2.2.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.2.1",

@@ -2,7 +2,7 @@ import { createElement, secondsToTime } from "../utils";
 import { changeIsWaitingVideo, changePlaying, setTime, synchronize, setSpeed } from "../playback";
 
 export function generateVideo() {
-    this._.form.video = createElement("video", {}, (el) => {
+    this._.form.video = createElement("video", {"playsinline": ""}, (el) => {
         // Обработка событий плей/пауза
         el._onplaying = () => {
             changePlaying.call(this, true);

@@ -53,8 +53,13 @@ export function changeIsWaitingAudio(val) {
 
 export function changePlaying(val) {
     if (val) {
-        if (!this._.form.audio._isWaiting) servicePlayingVideo.call(this, true);
-        if (!this._.form.video._isWaiting) servicePlayingAudio.call(this, true);
+        if(this._.form.audio._isWaiting && this._.form.video._isWaiting){
+            this._.form.audio.play();
+
+        }else{
+            if (!this._.form.audio._isWaiting) servicePlayingVideo.call(this, true);
+            if (!this._.form.video._isWaiting) servicePlayingAudio.call(this, true);
+        }
         this._.form.buttons.play.setAttribute("name", "pauseBtn");
     } else {
         servicePlayingVideo.call(this, false);
