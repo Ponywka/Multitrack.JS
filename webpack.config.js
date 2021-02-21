@@ -1,4 +1,5 @@
-var path = require('path')
+const path = require('path')
+const webpack = require('webpack')
 
 module.exports = {
 	mode: 'production',
@@ -17,5 +18,8 @@ module.exports = {
 		filename: 'main.js',
 		path: path.resolve(__dirname, 'dist'),
 		library: 'MultitrackJS'
-	}
+	},
+	plugins: [new webpack.DefinePlugin({
+		__TIMESTAMP__: JSON.stringify(new Date().getTime())
+	})],
 }

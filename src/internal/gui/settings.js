@@ -83,6 +83,7 @@ export function generateSettings() {
                             }
                         );
                         el.appendChild(authorBlock);
+                        el.innerHTML += "Build date: " + new Date(__TIMESTAMP__).toString();
                     }
                 ),
             },
