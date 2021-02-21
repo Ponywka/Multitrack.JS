@@ -18,8 +18,7 @@ export function init(selector, dataArray) {
     };
     this.playing = false;
 
-    if ((this._.element = document.querySelector(selector))) {
-        this._.element.setAttribute("application-name", "multitrack-js");
+    if ((this._.rootElement = document.querySelector(selector))) {
         gui.call(this);
 
         if (dataArray.placeholder)

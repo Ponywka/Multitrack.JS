@@ -10,6 +10,10 @@ import { generateButtons } from "./gui/buttons";
 import { generateOverlay } from "./gui/overlay";
 
 export function gui() {
+    this._.element = createElement("div", {
+        application_name: "multitrack-js"
+    });
+
     this._.form = {};
     // Генерация элементов GUI
     generateVideo.call(this);
@@ -46,4 +50,6 @@ export function gui() {
 
     gestures.call(this);
     hotkeys.call(this);
+
+    this._.rootElement.appendChild(this._.element);
 }
