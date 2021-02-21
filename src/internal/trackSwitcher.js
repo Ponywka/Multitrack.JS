@@ -1,9 +1,4 @@
-import {
-  servicePlayingVideo,
-  servicePlayingAudio,
-  changeIsWaitingVideo,
-  changeIsWaitingAudio,
-} from "./playback";
+import { downloadStatusUpdate } from "./playback";
 
 import { logError } from "./utils";
 
@@ -14,20 +9,19 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 export function setVideo(link) {
-  servicePlayingVideo.call(this, false);
-  changeIsWaitingVideo.call(this, true);
+  let time = this._.form.audio.currentTime;
+  this._.form.video.mjs_pause();
   this._.form.video.src = link;
-  this._.form.video.mjs_setTime(this._.form.audio.currentTime);
-  if (this.playing) servicePlayingVideo.call(this, true);
+  this._.form.video.mjs_setTime(time);
+  if (this.playing) this._.form.video.mjs_play();
 }
 
 export function setAudio(link) {
   let time = this._.form.audio.currentTime;
-  servicePlayingAudio.call(this, false);
-  changeIsWaitingAudio.call(this, true);
+  this._.form.audio.mjs_pause();
   this._.form.audio.src = link;
   this._.form.audio.currentTime = time;
-  if (this.playing) servicePlayingAudio.call(this, true);
+  if (this.playing) this._.form.audio.mjs_play();
 }
 
 export function setSubtitles(url) {

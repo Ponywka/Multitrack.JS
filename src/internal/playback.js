@@ -1,4 +1,5 @@
 export function synchronize() {
+  console.log("Sync...");
   let video = this._.form.video;
   let audio = this._.form.audio;
   let playbackSpeed = this._.playbackSpeed;
@@ -23,49 +24,34 @@ export function synchronize() {
   }
 }
 
-export function servicePlayingVideo(val) {
-  let el = this._.form.video;
-  val ? el.mjs_play() : el.mjs_pause();
-}
-
-export function servicePlayingAudio(val) {
-  let el = this._.form.audio;
-  val ? el.mjs_play() : el.mjs_pause();
-}
-
-export function changeIsWaitingVideo(val) {
-  if (val) {
-    servicePlayingAudio.call(this, false);
-  } else if (this.playing) {
-    servicePlayingAudio.call(this, true);
+export function downloadStatusUpdate(){
+  const video = this._.form.video;
+  const audio = this._.form.audio;
+  if(this.playing){
+    if(video.readyState == 4 && audio.readyState == 4){
+      this._.form.audio.mjs_play();
+      this._.form.video.mjs_play();
+    }else{
+      if(video.readyState != 4) this._.form.audio.mjs_pause();
+      if(audio.readyState != 4) this._.form.video.mjs_pause();
+    }
   }
-  this._.form.video._isWaiting = val;
-}
-
-export function changeIsWaitingAudio(val) {
-  if (val) {
-    servicePlayingVideo.call(this, false);
-  } else if (this.playing) {
-    servicePlayingVideo.call(this, true);
-  }
-  this._.form.audio._isWaiting = val;
 }
 
 export function changePlaying(val) {
+  this.playing = val;
   if (val) {
     if (this._.form.audio._isWaiting && this._.form.video._isWaiting) {
       this._.form.audio.play();
     } else {
-      if (!this._.form.audio._isWaiting) servicePlayingVideo.call(this, true);
-      if (!this._.form.video._isWaiting) servicePlayingAudio.call(this, true);
+      downloadStatusUpdate.call(this);
     }
     this._.form.buttons.play.setAttribute("name", "pauseBtn");
   } else {
-    servicePlayingVideo.call(this, false);
-    servicePlayingAudio.call(this, false);
+    this._.form.video.mjs_pause();
+    this._.form.audio.mjs_pause();
     this._.form.buttons.play.setAttribute("name", "playBtn");
   }
-  this.playing = val;
 }
 
 export function play() {

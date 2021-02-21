@@ -1,5 +1,5 @@
 import { createElement, secondsToTime } from "../utils";
-import { changePlaying, changeIsWaitingAudio, synchronize } from "../playback";
+import {downloadStatusUpdate, synchronize} from "../playback";
 
 export function generateAudio() {
   this._.form.audio = createElement("audio", {}, (el) => {
@@ -15,6 +15,11 @@ export function generateAudio() {
       });
     };
 
+    el.addEventListener("playing", () => {
+      console.log("PLAYAUDIO");
+      synchronize.call(this);
+    });
+
     el._onpause = () => {
       changePlaying.call(this, false);
     };
@@ -29,11 +34,12 @@ export function generateAudio() {
 
     // Обработка событий загрузки
     el.onwaiting = () => {
-      changeIsWaitingAudio.call(this, true);
+      downloadStatusUpdate.call(this);
     };
     el.oncanplay = () => {
-      changeIsWaitingAudio.call(this, false);
+      downloadStatusUpdate.call(this);
     };
+
     // Остальные обработчики событий
     el.onloadedmetadata = () => {
       this.duration = el.duration;

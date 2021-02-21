@@ -3,8 +3,7 @@ import {
   changeIsWaitingVideo,
   changePlaying,
   setTime,
-  synchronize,
-  setSpeed,
+  setSpeed, synchronize, downloadStatusUpdate,
 } from "../playback";
 
 export function generateVideo() {
@@ -14,11 +13,16 @@ export function generateVideo() {
       changePlaying.call(this, true);
     };
     el.onplaying = el._onplaying;
+
+    el.addEventListener("playing", () => {
+      console.log("PLAYVIDEO");
+      synchronize.call(this);
+    });
+
     el.mjs_play = () => {
       el.onplaying = null;
       el.play().then(() => {
         el.onplaying = el._onplaying;
-        synchronize.call(this);
       });
     };
 
@@ -61,11 +65,12 @@ export function generateVideo() {
 
     // Обработка событий загрузки
     el.onwaiting = () => {
-      changeIsWaitingVideo.call(this, true);
+      downloadStatusUpdate.call(this);
     };
     el.oncanplay = () => {
-      changeIsWaitingVideo.call(this, false);
+      downloadStatusUpdate.call(this);
     };
+
     el.onprogress = () => {
       var element = this._.form.progressbar.loaded;
       var canvas = this._.form.progressbar.loaded._canvas;
