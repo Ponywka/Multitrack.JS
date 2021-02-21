@@ -10,46 +10,46 @@ import { generateButtons } from "./gui/buttons";
 import { generateOverlay } from "./gui/overlay";
 
 export function gui() {
-    this._.element = createElement("div", {
-        application_name: "multitrack-js"
-    });
+  this._.element = createElement("div", {
+    application_name: "multitrack-js",
+  });
 
-    this._.form = {};
-    // Генерация элементов GUI
-    generateVideo.call(this);
-    generateAudio.call(this);
+  this._.form = {};
+  // Генерация элементов GUI
+  generateVideo.call(this);
+  generateAudio.call(this);
 
-    this._.form.subtitles = createElement("div", {
-        id: "subtitles",
-    });
-    this._.form.time = createElement(
-        "div",
-        {
-            name: "time",
-        },
-        (el) => {
-            el.innerText = "--:-- / --:--";
-        }
-    );
-    this._.form.title = createElement("div", {
-        name: "title",
-    });
+  this._.form.subtitles = createElement("div", {
+    id: "subtitles",
+  });
+  this._.form.time = createElement(
+    "div",
+    {
+      name: "time",
+    },
+    (el) => {
+      el.innerText = "--:-- / --:--";
+    }
+  );
+  this._.form.title = createElement("div", {
+    name: "title",
+  });
 
-    // Кнопки (массив)
-    generateButtons.call(this);
-    generateProgressbar.call(this);
-    generateVolume.call(this);
-    generateSettings.call(this);
-    generateOverlay.call(this);
+  // Кнопки (массив)
+  generateButtons.call(this);
+  generateProgressbar.call(this);
+  generateVolume.call(this);
+  generateSettings.call(this);
+  generateOverlay.call(this);
 
-    this._.element.appendChild(this._.form.video);
-    this._.element.appendChild(this._.form.audio);
-    this._.element.appendChild(this._.form.subtitles);
-    this._.element.appendChild(this._.form.overlays._root);
-    this._.element.appendChild(this._.form.settings._root);
+  this._.element.appendChild(this._.form.video);
+  this._.element.appendChild(this._.form.audio);
+  this._.element.appendChild(this._.form.subtitles);
+  this._.element.appendChild(this._.form.overlays._root);
+  this._.element.appendChild(this._.form.settings._root);
 
-    gestures.call(this);
-    hotkeys.call(this);
+  gestures.call(this);
+  hotkeys.call(this);
 
-    this._.rootElement.appendChild(this._.element);
+  this._.rootElement.appendChild(this._.element);
 }
