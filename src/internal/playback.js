@@ -39,19 +39,20 @@ export function downloadStatusUpdate(){
 }
 
 export function changePlaying(val) {
-  this.playing = val;
-  if (val) {
-    if (this._.form.audio._isWaiting && this._.form.video._isWaiting) {
+  if(val){
+    if(this._.form.audio._isWaiting && this._.form.video._isWaiting){
       this._.form.audio.play();
-    } else {
-      downloadStatusUpdate.call(this);
+    }else{
+      if(!this._.form.audio._isWaiting) this._.form.video.mjs_play();
+      if(!this._.form.video._isWaiting) this._.form.audio.mjs_play();
     }
     this._.form.buttons.play.setAttribute("name", "pauseBtn");
-  } else {
+  }else{
     this._.form.video.mjs_pause();
     this._.form.audio.mjs_pause();
     this._.form.buttons.play.setAttribute("name", "playBtn");
   }
+  this.playing = val;
 }
 
 export function play() {

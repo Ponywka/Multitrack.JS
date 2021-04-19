@@ -7,7 +7,7 @@ import {
 } from "../playback";
 
 export function generateVideo() {
-  this._.form.video = createElement("video", { playsinline: "" }, (el) => {
+  this._.form.video = createElement("video", { playsinline: "", preload: "metadata" }, (el) => {
     // Обработка событий плей/пауза
     el._onplaying = () => {
       changePlaying.call(this, true);
@@ -23,6 +23,11 @@ export function generateVideo() {
       el.onplaying = null;
       el.play().then(() => {
         el.onplaying = el._onplaying;
+      }).catch(err => {
+        // TODO: Заменить костыль с Catch на что-то другое, более нормальное
+        // Тут тип "фикс" ошибки "Unhandled Promise Rejection: AbortError: The operation was aborted." на устройства iOS
+        el.onplaying = el._onplaying;
+        changePlaying.call(this, false);
       });
     };
 
