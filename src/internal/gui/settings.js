@@ -52,12 +52,10 @@ export function generateSettings() {
             blockName: "info",
           },
           (el) => {
-            el.innerHTML +=
-              '<a href="https://forms.gle/gTrxarVsZoof3CyW6" target="_blank" style="color: #ffccff; font-size: 24px">Баг-репорт</a> (перед отправкой проверьте ссылку ниже, возможно этот баг уже известен!)';
             let authorBlock = createElement(
               "div",
               {
-                style: "display: flex; padding: 12px 0px",
+                style: "display: flex; padding-bottom: 12px",
               },
               (bl) => {
                 bl.appendChild(
