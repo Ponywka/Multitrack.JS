@@ -25,15 +25,17 @@ export function synchronize() {
 }
 
 export function downloadStatusUpdate(){
+  const allowedStates = [3,4];
   const video = this._.form.video;
   const audio = this._.form.audio;
+  console.trace(`Hmmm... ${video.readyState} ${audio.readyState}`);
   if(this.playing){
-    if(video.readyState == 4 && audio.readyState == 4){
-      this._.form.audio.mjs_play();
-      this._.form.video.mjs_play();
+    if(allowedStates.includes(video.readyState) && allowedStates.includes(audio.readyState)){
+      audio.mjs_play();
+      video.mjs_play();
     }else{
-      if(video.readyState != 4) this._.form.audio.mjs_pause();
-      if(audio.readyState != 4) this._.form.video.mjs_pause();
+      if(!allowedStates.includes(video.readyState)) audio.mjs_pause();
+      if(!allowedStates.includes(audio.readyState)) video.mjs_pause();
     }
   }
 }
