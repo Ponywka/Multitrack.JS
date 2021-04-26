@@ -12,7 +12,7 @@ export function toggleFullscreen() {
       document.exitFullscreen();
     } else if (document.mozCancelFullScreen) {
       document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
+    } else if (document.webkitsExitFullscreen) {
       document.webkitExitFullscreen();
     } else if (document.msExitFullscreen) {
       document.msExitFullscreen();
@@ -28,6 +28,12 @@ export function toggleFullscreen() {
       element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
     } else if (element.msRequestFullscreen) {
       element.msRequestFullscreen();
+    } else {
+      // For stupid users with iPhone
+      element = this._.form.video;
+      if(element.webkitEnterFullscreen){
+        element.webkitEnterFullscreen();
+      }
     }
     this._.form.buttons.fullscreen.setAttribute("name", "fullscreenOff");
   }
