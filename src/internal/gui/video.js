@@ -14,10 +14,6 @@ export function generateVideo() {
     };
     el.onplaying = el._onplaying;
 
-    el.addEventListener("playing", () => {
-      synchronize.call(this);
-    });
-
     el.mjs_play = () => {
       el.onplaying = null;
       el.play().then(() => {

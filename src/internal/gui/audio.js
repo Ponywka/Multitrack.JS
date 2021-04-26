@@ -15,10 +15,6 @@ export function generateAudio() {
       });
     };
 
-    el.addEventListener("playing", () => {
-      synchronize.call(this);
-    });
-
     el._onpause = () => {
       changePlaying.call(this, false);
     };
