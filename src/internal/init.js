@@ -15,6 +15,7 @@ export function init(selector, dataArray) {
     audios: dataArray.audios,
     subtitles: dataArray.subtitles,
     playbackSpeed: 1,
+    enable_sync: false,
   };
   this.playing = false;
 
@@ -24,5 +25,6 @@ export function init(selector, dataArray) {
     if (dataArray.placeholder) this._.form.video.poster = dataArray.placeholder;
     if (dataArray.preview) this._.parameters.frames.image = dataArray.preview;
     this._.form.title.innerText = dataArray.title;
+    this.trySync = true;
   } else logError.call(this, `Can not find "${selector}" element!`);
 }

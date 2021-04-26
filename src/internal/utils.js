@@ -29,3 +29,11 @@ export function createElement(tag, params = {}, actions = () => {}) {
   actions(el);
   return el;
 }
+
+export function sleep(ms){
+  return new Promise(reject => {
+    setTimeout(()=>{
+      reject()
+    }, ms);
+  })
+}
