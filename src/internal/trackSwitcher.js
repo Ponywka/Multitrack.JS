@@ -9,18 +9,22 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 export function setVideo(link) {
-  let time = this._.form.audio.currentTime;
+  const currentTime = this._.form.audio.currentTime;
+  const playbackSpeed = this._.playbackSpeed;
   this._.form.video.mjs_pause();
   this._.form.video.src = link;
-  this._.form.video.mjs_setTime(time);
+  this._.form.video.mjs_setTime(currentTime);
+  this._.form.video.mjs_setRate(playbackSpeed);
   if (this.playing) this._.form.video.mjs_play();
 }
 
 export function setAudio(link) {
-  let time = this._.form.audio.currentTime;
+  const currentTime = this._.form.audio.currentTime;
+  const playbackSpeed = this._.playbackSpeed;
   this._.form.audio.mjs_pause();
   this._.form.audio.src = link;
-  this._.form.audio.currentTime = time;
+  this._.form.audio.currentTime = currentTime;
+  this._.form.audio.playbackSpeed = playbackSpeed;
   if (this.playing) this._.form.audio.mjs_play();
 }
 
