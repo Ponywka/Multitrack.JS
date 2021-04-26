@@ -1,34 +1,39 @@
-export function synchronize() {
-  console.log("Sync...");
-  let video = this._.form.video;
-  let audio = this._.form.audio;
-  let playbackSpeed = this._.playbackSpeed;
-  let diff = video.currentTime - audio.currentTime;
+export function synchronize(target = null) {
+  const root = (target) ? target : this;
+  return new Promise(resolve => {
+    const video = root._.form.video;
+    const audio = root._.form.audio;
+    const playbackSpeed = root._.playbackSpeed;
+    const diff = video.currentTime - audio.currentTime;
 
-  audio.playbackRate = playbackSpeed;
-  video.mjs_setRate(playbackSpeed);
-  if (video.syncTimeout) clearTimeout(video.syncTimeout);
-  video.syncTimeout = null;
+    audio.playbackRate = playbackSpeed;
+    video.mjs_setRate(playbackSpeed);
+    if (video.syncTimeout) clearTimeout(video.syncTimeout);
+    video.syncTimeout = null;
 
-  if (this.playing && Math.abs(diff) > 1 / 60) {
-    let scale = playbackSpeed - diff;
-    if (0.25 <= scale && scale <= 4) {
-      video.mjs_setRate(scale);
-      video.syncTimeout = setTimeout(() => {
-        video.mjs_setRate(playbackSpeed);
-        video.syncTimeout = null;
-      }, 1000);
-    } else {
-      video.mjs_setTime(audio.currentTime);
+    if (root.playing && Math.abs(diff) > 1 / 60) {
+      let scale = playbackSpeed - diff;
+      if (0.25 <= scale && scale <= 4) {
+        video.mjs_setRate(scale);
+        video.syncTimeout = setTimeout(() => {
+          video.mjs_setRate(playbackSpeed);
+          video.syncTimeout = null;
+          resolve();
+        }, 1000);
+      } else {
+        video.mjs_setTime(audio.currentTime);
+        resolve();
+      }
+    }else{
+      resolve();
     }
-  }
+  })
 }
 
 export function downloadStatusUpdate(){
   const allowedStates = [3,4];
   const video = this._.form.video;
   const audio = this._.form.audio;
-  console.trace(`Hmmm... ${video.readyState} ${audio.readyState}`);
   if(this.playing){
     if(allowedStates.includes(video.readyState) && allowedStates.includes(audio.readyState)){
       audio.mjs_play();
