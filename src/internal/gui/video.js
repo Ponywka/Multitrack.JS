@@ -15,7 +15,6 @@ export function generateVideo() {
     el.onplaying = el._onplaying;
 
     el.addEventListener("playing", () => {
-      console.log("PLAYVIDEO");
       synchronize.call(this);
     });
 

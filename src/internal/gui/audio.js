@@ -16,7 +16,6 @@ export function generateAudio() {
     };
 
     el.addEventListener("playing", () => {
-      console.log("PLAYAUDIO");
       synchronize.call(this);
     });
 
