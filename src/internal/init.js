@@ -26,5 +26,9 @@ export function init(selector, dataArray) {
     if (dataArray.preview) this._.parameters.frames.image = dataArray.preview;
     this._.form.title.innerText = dataArray.title;
     this.trySync = true;
+
+    window.addEventListener("resize", () => {
+      this.resize()
+    });
   } else logError.call(this, `Can not find "${selector}" element!`);
 }
