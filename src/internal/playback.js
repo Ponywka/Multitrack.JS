@@ -18,8 +18,10 @@ export function synchronize(target = null) {
         video.syncTimeout = setTimeout(() => {
           video.mjs_setRate(playbackSpeed);
           video.syncTimeout = null;
-          resolve();
         }, 1000);
+	setTimeout(() => {
+	  resolve();
+	}, 1050);
       } else {
         video.mjs_setTime(audio.currentTime);
         resolve();
