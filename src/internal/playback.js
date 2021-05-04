@@ -55,11 +55,11 @@ export function changePlaying(val) {
       if(!this._.form.audio._isWaiting) this._.form.video.mjs_play();
       if(!this._.form.video._isWaiting) this._.form.audio.mjs_play();
     }
-    this._.form.buttons.play.setAttribute("name", "pauseBtn");
+    this._.form.buttons.play.setAttribute("icon", "pauseBtn");
   }else{
     this._.form.video.mjs_pause();
     this._.form.audio.mjs_pause();
-    this._.form.buttons.play.setAttribute("name", "playBtn");
+    this._.form.buttons.play.setAttribute("icon", "playBtn");
   }
   this.playing = val;
 }
