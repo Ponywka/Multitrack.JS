@@ -10,9 +10,8 @@ import { generateButtons } from "./gui/buttons";
 import { generateOverlay } from "./gui/overlay";
 
 export function gui() {
-  this._.element = createElement("div", {
-    application_name: "multitrack-js",
-  });
+  this._.rootElement.classList.add("mjs");
+  this._.element = createElement("div", { class: "mjs__root" });
 
   this._.form = {};
   // Генерация элементов GUI
@@ -20,19 +19,19 @@ export function gui() {
   generateAudio.call(this);
 
   this._.form.subtitles = createElement("div", {
-    id: "subtitles",
+    class: "mjs__subtitles",
   });
   this._.form.time = createElement(
     "div",
     {
-      name: "time",
+      class: "mjs__overlay-time",
     },
     (el) => {
       el.innerText = "--:-- / --:--";
     }
   );
   this._.form.title = createElement("div", {
-    name: "title",
+    class: "mjs__overlay-title",
   });
 
   // Кнопки (массив)

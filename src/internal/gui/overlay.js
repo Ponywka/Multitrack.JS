@@ -3,33 +3,33 @@ import { createElement } from "../utils";
 export function generateOverlay() {
   let GUItimeout;
   this._.element.addEventListener("mousemove", () => {
-    this._.form.overlays._root.removeAttribute("style");
+    const overlayEl = this._.form.overlays._root;
+    overlayEl.classList.remove("mjs__overlay_hidden");
+    overlayEl.removeAttribute("style");
     clearTimeout(GUItimeout);
     GUItimeout = setTimeout(() => {
-      this._.form.overlays._root.setAttribute(
-        "style",
-        "opacity: 0; cursor: none;"
-      );
+      overlayEl.classList.add("mjs__overlay_hidden");
     }, 3000);
   });
   this._.element.addEventListener("mouseout", () => {
+    const overlayEl = this._.form.overlays._root;
     clearTimeout(GUItimeout);
-    this._.form.overlays._root.setAttribute("style", "opacity: 0;");
+    overlayEl.classList.add("mjs__overlay_hidden");
   });
 
   this._.form.overlays = {
     _root: createElement(
       "div",
       {
-        name: "overlay",
+        class: "mjs__overlay",
       },
       (el) => {}
     ),
     bottom: createElement("div", {
-      name: "overlay-bottom",
+      class: "mjs__overlay-bottom",
     }),
     top: createElement("div", {
-      name: "overlay-top",
+      class: "mjs__overlay-top",
     }),
   };
 

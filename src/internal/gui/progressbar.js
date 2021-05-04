@@ -3,12 +3,12 @@ import { createElement, getPosInElement, secondsToTime } from "../utils";
 export function generateProgressbar() {
   this._.form.progressbar = {
     line: createElement("div", {
-      name: "progress-line",
+      class: "mjs__overlay-progressBar-background",
     }),
     loaded: createElement(
       "canvas",
       {
-        name: "progress-loaded",
+        class: "mjs__overlay-progressBar-loaded",
         height: 1,
       },
       (el) => {
@@ -16,27 +16,27 @@ export function generateProgressbar() {
       }
     ),
     played: createElement("div", {
-      name: "progress-played",
+      class: "mjs__overlay-progressBar-played",
     }),
     popup: createElement(
       "div",
       {
-        name: "timeline-popup",
+        class: "mjs__overlay-progressPopup",
         style: "display: none",
       },
       (el) => {
         el.text = createElement("div", {
-          name: "timeline-popup-time",
+          class: "mjs__overlay-progressPopup-time",
         });
         el.image = createElement("div", {
-          name: "timeline-popup-image",
+          class: "mjs__overlay-progressPopup-image",
         });
       }
     ),
     _root: createElement(
       "div",
       {
-        name: "progress-all",
+        class: "mjs__overlay-progressBar",
       },
       (el) => {
         let updatePopup = (cursorX, position) => {

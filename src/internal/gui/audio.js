@@ -1,5 +1,5 @@
 import { createElement, secondsToTime } from "../utils";
-import {downloadStatusUpdate, synchronize} from "../playback";
+import { downloadStatusUpdate, synchronize } from "../playback";
 
 export function generateAudio() {
   this._.form.audio = createElement("audio", {}, (el) => {

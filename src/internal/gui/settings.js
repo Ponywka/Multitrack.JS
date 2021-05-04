@@ -89,12 +89,12 @@ export function generateSettings() {
       },
     },
     title: createElement("div", {
-      name: "title",
+      style: "mjs__settingsHeader-title",
     }),
     header: createElement(
       "div",
       {
-        name: "settingsHeader",
+        class: "mjs__settingsHeader",
       },
       (el) => {
         el.addEventListener("click", () => {
@@ -103,13 +103,13 @@ export function generateSettings() {
       }
     ),
     body: createElement("div", {
-      name: "settingsBody",
+      class: "mjs__settingsBody",
     }),
     menuSwitcher: {
       _root: createElement("div"),
     },
     _root: createElement("div", {
-      name: "settings",
+      class: "mjs__settings",
     }),
   };
 
@@ -124,7 +124,7 @@ export function generateSettings() {
     this._.form.settings.menuSwitcher[`btn${el}`] = createElement(
       "div",
       {
-        name: "listEl",
+        class: "mjs__settings_element",
         page: el,
       },
       (btn) => {
@@ -158,7 +158,7 @@ export function generateSettings() {
     let btn = createElement(
       "div",
       {
-        name: "listEl",
+        class: "mjs__settings_element",
         link: el.path,
       },
       (btn) => {
@@ -185,7 +185,7 @@ export function generateSettings() {
     let btn = createElement(
       "div",
       {
-        name: "listEl",
+        class: "mjs__settings_element",
         link: el.path,
       },
       (btn) => {
@@ -210,7 +210,7 @@ export function generateSettings() {
   let noSubtitles = createElement(
     "div",
     {
-      name: "listEl",
+      class: "mjs__settings_element",
     },
     (btn) => {
       btn.innerText = "Отключено";
@@ -231,7 +231,7 @@ export function generateSettings() {
     let btn = createElement(
       "div",
       {
-        name: "listEl",
+        class: "mjs__settings_element",
         link: el.path,
       },
       (btn) => {
@@ -253,7 +253,7 @@ export function generateSettings() {
     let btn = createElement(
       "div",
       {
-        name: "listEl",
+        class: "mjs__settings_element",
         speed: speed,
       },
       (btn) => {

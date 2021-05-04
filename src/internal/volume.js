@@ -1,7 +1,7 @@
 export function setVolume(val) {
   if (val < 0) val = 0;
   if (val > 1) val = 1;
-  this._.form.buttons.volume.setAttribute("icon", Math.ceil(val * 3));
+  this._.form.buttons.volume.setAttribute("iconVar", Math.ceil(val * 3));
   this._.form.volumebar.selected.setAttribute("style", `width: ${100 * val}%`);
   this._.form.audio.volume = val;
 }

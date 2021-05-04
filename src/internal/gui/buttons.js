@@ -2,40 +2,24 @@ import { createElement, logError } from "../utils";
 import { toggleSettings } from "../gui/settings";
 
 export function toggleFullscreen() {
-  if (
-    document.fullscreenElement ||
-    document.webkitFullscreenElement ||
-    document.mozFullScreenElement ||
-    document.msFullscreenElement
-  ) {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitsExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-    this._.form.buttons.fullscreen.setAttribute("name", "fullscreenOn");
+  if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen()
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen()
+    else if (document.webkitsExitFullscreen) document.webkitExitFullscreen()
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+    this._.form.buttons.fullscreen.setAttribute("icon", "fullscreenOn");
   } else {
     var element = this._.element;
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    } else {
+    if (element.requestFullscreen) element.requestFullscreen()
+    else if (element.mozRequestFullScreen) element.mozRequestFullScreen()
+    else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT)
+    else if (element.msRequestFullscreen) element.msRequestFullscreen()
+    else {
       // For stupid users with iPhone
       element = this._.form.video;
-      if(element.webkitEnterFullscreen){
-        element.webkitEnterFullscreen();
-      }
+      if(element.webkitEnterFullscreen) element.webkitEnterFullscreen();
     }
-    this._.form.buttons.fullscreen.setAttribute("name", "fullscreenOff");
+    this._.form.buttons.fullscreen.setAttribute("icon", "fullscreenOff");
   }
 }
 
@@ -45,7 +29,8 @@ export function generateButtons() {
     play: createElement(
       "button",
       {
-        name: "playBtn",
+        icon: "playBtn",
+        class: "mjs__overlay-button",
       },
       (el) => {
         el.onclick = () => {
@@ -57,7 +42,8 @@ export function generateButtons() {
     backward10: createElement(
       "button",
       {
-        name: "backward10",
+        icon: "backward10",
+        class: "mjs__overlay-button",
       },
       (el) => {
         el.onclick = () => {
@@ -69,7 +55,8 @@ export function generateButtons() {
     forward10: createElement(
       "button",
       {
-        name: "forward10",
+        icon: "forward10",
+        class: "mjs__overlay-button",
       },
       (el) => {
         el.onclick = () => {
@@ -81,7 +68,8 @@ export function generateButtons() {
     fullscreen: createElement(
       "button",
       {
-        name: "fullscreenOn",
+        icon: "fullscreenOn",
+        class: "mjs__overlay-button",
       },
       (el) => {
         el.onclick = (btn) => {
@@ -93,17 +81,18 @@ export function generateButtons() {
     pip: createElement(
       "button",
       {
-        name: "pipOn",
+        icon: "pipOn",
+        class: "mjs__overlay-button",
       },
       (el) => {
         el.onclick = (btn) => {
           if ("pictureInPictureEnabled" in document) {
             if (this._.form.video !== document.pictureInPictureElement) {
               this._.form.video.requestPictureInPicture();
-              el.setAttribute("name", "pipOff");
+              el.setAttribute("icon", "pipOff");
             } else {
               document.exitPictureInPicture();
-              el.setAttribute("name", "pipOn");
+              el.setAttribute("icon", "pipOn");
             }
           } else {
             logError.call(
@@ -118,7 +107,8 @@ export function generateButtons() {
     menu: createElement(
       "button",
       {
-        name: "menu",
+        icon: "menu",
+        class: "mjs__overlay-button",
       },
       (el) => {
         el.addEventListener("click", () => {

@@ -5,8 +5,9 @@ export function generateVolume() {
   (this._.form.buttons.volume = createElement(
     "button",
     {
-      name: "volume",
-      icon: 3,
+      class: "mjs__overlay-button",
+      icon: "volume",
+      iconVar: 3,
     },
     (el) => {
       el.addEventListener("click", () => {
@@ -16,15 +17,15 @@ export function generateVolume() {
   )),
     (this._.form.volumebar = {
       line: createElement("div", {
-        name: "volumebar-line",
+        class: "mjs__overlay-volumeBar-background",
       }),
       selected: createElement("div", {
-        name: "volumebar-selected",
+        class: "mjs__overlay-volumeBar-selected",
       }),
       _root: createElement(
         "div",
         {
-          name: "volumebar-all",
+          class: "mjs__overlay-volumeBar",
         },
         (el) => {
           let release = (event) => {
