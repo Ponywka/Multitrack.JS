@@ -1,4 +1,5 @@
-import { setVolume } from "../volume";
+import { setVolume, mute } from "../volume";
+import { toggleFullscreen } from "../gui/buttons";
 
 export function hotkeys() {
   document.addEventListener("keydown", (event) => {
@@ -23,7 +24,7 @@ export function hotkeys() {
         this.rewind(10);
         break;
       case "KeyM":
-        this.mute(false);
+        mute.call(this, false);
         break;
       case "ArrowUp":
         event.preventDefault();
