@@ -1,4 +1,7 @@
 .mjs {
+  --mjs--accent-color: #00b3ff;
+  --mjs--accent-text: black;
+
   display: block;
 
   width: 854px;
@@ -47,7 +50,7 @@
     max-width: 300px;
     width: 100%;
     max-height: calc(100% - 64px);
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(255, 255, 255, 0.75);
     overflow: hidden;
     border-radius: 8px;
 
@@ -79,18 +82,20 @@
 
     .mjs__settingsBody {
       & > div {
-        padding: 8px 0px;
+        padding: 4px 6px;
       }
 
       .mjs__settings_element {
         display: block;
-        height: 32px;
+        border-radius: 4px;
         width: 100%;
+        height: 32px;
         box-sizing: border-box;
         display: flex;
         padding: 0px 12px;
+        margin: 2px 0px;
         line-height: 32px;
-        color: white;
+        color: black;
         text-decoration: none;
         cursor: pointer;
         transition: 0.3s background;
@@ -102,7 +107,7 @@
         }
 
         &[selected="true"] {
-          background-color: rgba(255, 255, 255, 0.5);
+          background-color: var(--mjs--accent-color, rgba(255, 255, 255, 0.5));
         }
       }
 
@@ -125,17 +130,11 @@
     background: linear-gradient(
         to top,
         rgba(0, 0, 0, 0.75) 0px,
-        rgba(0, 0, 0, 0.6),
-        rgba(0, 0, 0, 0.375),
-        rgba(0, 0, 0, 0.15),
         rgba(0, 0, 0, 0) 96px
       ),
       linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.75) 0px,
-        rgba(0, 0, 0, 0.6),
-        rgba(0, 0, 0, 0.375),
-        rgba(0, 0, 0, 0.15),
         rgba(0, 0, 0, 0) 96px
       );
     transition: 0.3s opacity, 0.3s visibility;
@@ -143,7 +142,7 @@
     .mjs__overlay-progressBar {
       position: absolute;
       left: 0;
-      bottom: 38px;
+      bottom: 44px;
       width: -webkit-fill-available;
       width: -moz-available;
       width: fill-available;
@@ -153,6 +152,8 @@
       cursor: pointer;
 
       .mjs__overlay-progressPopup {
+        opacity: 0;
+        transition: .3s opacity;
         position: absolute;
         bottom: 16px;
         padding: 2px;
@@ -172,25 +173,21 @@
         }
       }
 
-      &:hover {
-        .mjs__overlay-progressBar-played::before {
-          display: block;
-          content: " ";
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          position: absolute;
-          top: 50%;
-          right: 0;
-          transform: translateX(50%) translateY(-50%);
-          background-color: white;
-        }
+      .mjs__overlay-progressPopup-show {
+        opacity: 1;
+      }
 
-        .mjs__overlay-progressBar-background,
-        .mjs__overlay-progressBar-loaded,
-        .mjs__overlay-progressBar-played {
-          height: 6px;
-        }
+      .mjs__overlay-progressBar-played::before {
+        display: block;
+        content: " ";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateX(50%) translateY(-50%);
+        background-color: white;
       }
 
       .mjs__overlay-progressBar-background,
@@ -202,6 +199,7 @@
         left: 0;
         height: 4px;
         width: 100%;
+        border-radius: 2px;
       }
 
       .mjs__overlay-progressBar-played {
@@ -217,7 +215,7 @@
       }
 
       .mjs__overlay-progressBar-played {
-        background-color: white;
+        background-color: var(--mjs--accent-color, white);
       }
     }
 
@@ -244,7 +242,7 @@
       }
 
       .mjs__overlay-volumeBar-selected {
-        background-color: white;
+        background-color: var(--mjs--accent-color, white);
       }
 
       .mjs__overlay-volumeBar-selected::before {
@@ -267,8 +265,8 @@
       position: absolute;
       left: 0;
       width: 100%;
-      height: 44px;
-      padding: 4px;
+      height: 52px;
+      padding: 8px;
       box-sizing: border-box;
     }
 
@@ -297,27 +295,34 @@
   .mjs__overlay-button {
     display: block;
     border: none;
+    border-radius: 4px;
     margin: none;
-    padding: 6px;
+    padding: 4px;
+    margin: 2px;
     width: 24px;
     height: 24px;
     box-sizing: content-box;
     background-color: transparent;
     background-position: 50%;
     background-repeat: no-repeat;
+    transition: .3s background;
     cursor: pointer;
+
+    &:hover {
+      background-color: var(--mjs--accent-color, rgba(255,255,255,.25));
+    }
 
     &[hidden] {
       display: none;
     }
 
     &[icon="playBtn"] {
-      padding: 6px 11px;
+      padding: 4px 9px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M8 5v14l11-7z' fill='white'/%3E%3C/svg%3E");
     }
 
     &[icon="pauseBtn"] {
-      padding: 6px 11px;
+      padding: 4px 9px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M6 19h4V5H6v14zm8-14v14h4V5h-4z' fill='white'/%3E%3C/svg%3E");
     }
 

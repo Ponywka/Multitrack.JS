@@ -22,7 +22,6 @@ export function generateProgressbar() {
       "div",
       {
         class: "mjs__overlay-progressPopup",
-        style: "display: none",
       },
       (el) => {
         el.text = createElement("div", {
@@ -44,6 +43,7 @@ export function generateProgressbar() {
           this._.form.progressbar.popup.text.innerText = secondsToTime(
             this.duration * position
           );
+          this._.form.progressbar.popup.classList.add("mjs__overlay-progressPopup-show");
           if (this._.form.progressbar.popup.clientWidth != 0) {
             this._.form.progressbar.popup.halfWidth =
               this._.form.progressbar.popup.clientWidth / 2;
@@ -116,7 +116,7 @@ export function generateProgressbar() {
         };
         let release = (event) => {
           this._.form.progressbar.updateStyle = false;
-          this._.form.progressbar.popup.setAttribute("style", "display: none");
+          this._.form.progressbar.popup.classList.remove("mjs__overlay-progressPopup-show");
           this.setTime(
             (this.duration * getPosInElement(el, event).x) / el.clientWidth
           );
@@ -144,14 +144,11 @@ export function generateProgressbar() {
           if (this._.form.progressbar.updateStyle || cursor.y > 0) {
             updatePopup(cursor.x, position);
           } else {
-            this._.form.progressbar.popup.setAttribute(
-              "style",
-              "display: none"
-            );
+            this._.form.progressbar.popup.classList.remove("mjs__overlay-progressPopup-show");
           }
         });
         el.addEventListener("mouseout", (event) => {
-          this._.form.progressbar.popup.setAttribute("style", "display: none");
+          this._.form.progressbar.popup.classList.remove("mjs__overlay-progressPopup-show");
         });
       }
     ),

@@ -1,4 +1,5 @@
 export function synchronize(target = null) {
+  console.log("sync...");
   const root = (target) ? target : this;
   return new Promise(resolve => {
     const video = root._.form.video;
