@@ -21,7 +21,7 @@ export default class {
         let now = Date.now() - 1000;
         while(root._.enable_sync){
           if(Date.now() - now > 900) {
-            await synchronize(root);
+            if(root.playing ) await synchronize(root);
             now = Date.now();
           }else{
             await sleep(1000);
