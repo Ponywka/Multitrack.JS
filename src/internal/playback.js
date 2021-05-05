@@ -19,9 +19,9 @@ export function synchronize(target = null) {
           video.mjs_setRate(playbackSpeed);
           video.syncTimeout = null;
         }, 1000);
-	setTimeout(() => {
-	  resolve();
-	}, 1050);
+        setTimeout(() => {
+          resolve();
+        }, 1050);
       } else {
         video.mjs_setTime(audio.currentTime);
         resolve();
@@ -41,7 +41,7 @@ export function downloadStatusUpdate(){
       audio.mjs_play();
       video.mjs_play();
     }else{
-      if(!allowedStates.includes(video.readyState)) audio.mjs_pause();
+      if(!allowedStates.includes(video.readyState) && document.hasFocus()) audio.mjs_pause();
       if(!allowedStates.includes(audio.readyState)) video.mjs_pause();
     }
   }
