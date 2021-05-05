@@ -1,4 +1,5 @@
 export function synchronize(target = null) {
+  if (process.env.NODE_ENV !== 'production') console.log("Sync: Call");
   const root = (target) ? target : this;
   return new Promise(resolve => {
     const video = root._.form.video;
@@ -12,17 +13,25 @@ export function synchronize(target = null) {
     video.syncTimeout = null;
 
     if (root.playing && Math.abs(diff) > 1 / 60) {
+      if (process.env.NODE_ENV !== 'production') console.log("Sync: Need to sync");
       let scale = playbackSpeed - diff;
       if (0.25 <= scale && scale <= 4) {
-        video.mjs_setRate(scale);
-        video.syncTimeout = setTimeout(() => {
-          video.mjs_setRate(playbackSpeed);
-          video.syncTimeout = null;
-        }, 1000);
-        setTimeout(() => {
+        if(document.hasFocus()) {
+          if (process.env.NODE_ENV !== 'production') console.log(`Sync: Rate changed to ${scale}`);
+          video.mjs_setRate(scale);
+          video.syncTimeout = setTimeout(() => {
+            if (process.env.NODE_ENV !== 'production') console.log("Sync: Rate changed back");
+            video.mjs_setRate(playbackSpeed);
+            video.syncTimeout = null;
+          }, 1000);
+          setTimeout(() => {
+            resolve();
+          }, 1050);
+        }else{
           resolve();
-        }, 1050);
+        }
       } else {
+        if (process.env.NODE_ENV !== 'production') console.log(`Sync: Seeked to ${audio.currentTime}`);
         video.mjs_setTime(audio.currentTime);
         resolve();
       }

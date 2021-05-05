@@ -55,7 +55,6 @@ export function generateVideo() {
     };
     el.onratechange = el._onratechange;
     el.mjs_setRate = (val) => {
-      console.log("Rate changed to: ", val);
       el.onratechange = null;
       el.playbackRate = val;
       setTimeout(() => {
