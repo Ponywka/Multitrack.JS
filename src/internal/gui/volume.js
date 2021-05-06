@@ -11,7 +11,7 @@ export function generateVolume() {
     },
     (el) => {
       el.addEventListener("click", () => {
-        mute.call(this, false);
+        mute.call(this, true);
       });
     }
   )),
@@ -33,14 +33,14 @@ export function generateVolume() {
             // Получение координаты и вычисление позиции (от 0 до 1)
             var cursorX = getPosInElement(el, event).x;
             var position = getPosInElement(el, event).x / el.clientWidth;
-            setVolume.call(this, position);
+            this.volume = position;
           };
           let move = (event) => {
             if (this._.form.volumebar.updateStyle) {
               // Получение координаты и вычисление позиции (от 0 до 1)
               var cursorX = getPosInElement(el, event).x;
               var position = cursorX / el.clientWidth;
-              setVolume.call(this, position);
+              this.volume = position;
             }
           };
           el.addEventListener("mousedown", () => {

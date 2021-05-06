@@ -4,17 +4,17 @@ export function generateOverlay() {
   let GUItimeout;
   this._.element.addEventListener("mousemove", () => {
     const overlayEl = this._.form.overlays._root;
-    overlayEl.classList.remove("mjs__overlay_hidden");
+    this._.rootElement.classList.remove("mjs__overlay_hidden");
     overlayEl.removeAttribute("style");
     clearTimeout(GUItimeout);
     GUItimeout = setTimeout(() => {
-      overlayEl.classList.add("mjs__overlay_hidden");
+      this._.rootElement.classList.add("mjs__overlay_hidden");
     }, 3000);
   });
   this._.element.addEventListener("mouseout", () => {
     const overlayEl = this._.form.overlays._root;
     clearTimeout(GUItimeout);
-    overlayEl.classList.add("mjs__overlay_hidden");
+    this._.rootElement.classList.add("mjs__overlay_hidden");
   });
 
   this._.form.overlays = {
@@ -57,7 +57,7 @@ export function generateOverlay() {
   this._.form.overlays._root.appendChild(this._.form.progressbar._root);
   this._.form.overlays._root.addEventListener("click", (event) => {
     if (event.target == this._.form.overlays._root) {
-      this.playing ? this.pause() : this.play();
+      this._.playing ? this.pause() : this.play();
     }
   });
 }

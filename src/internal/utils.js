@@ -14,13 +14,10 @@ export function secondsToTime(sec) {
   let seconds = sec % 60;
   let minutes = Math.floor(sec / 60) % 60;
   let hours = Math.floor(sec / 3600);
-  return hours > 0
-    ? `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-    : `${minutes.toString().padStart(2, "0")}:${seconds
-        .toString()
-        .padStart(2, "0")}`;
+
+  minutes = minutes.toString().padStart(2, "0");
+  seconds = seconds.toString().padStart(2, "0");
+  return hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 }
 
 export function createElement(tag, params = {}, actions = () => {}) {
@@ -30,10 +27,10 @@ export function createElement(tag, params = {}, actions = () => {}) {
   return el;
 }
 
-export function sleep(ms){
-  return new Promise(reject => {
-    setTimeout(()=>{
-      reject()
+export function sleep(ms) {
+  return new Promise((reject) => {
+    setTimeout(() => {
+      reject();
     }, ms);
-  })
+  });
 }

@@ -1,23 +1,30 @@
 import { createElement, logError } from "../utils";
 import { toggleSettings } from "../gui/settings";
+import { rewind } from "../playback";
 
 export function toggleFullscreen() {
-  if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-    if (document.exitFullscreen) document.exitFullscreen()
-    else if (document.mozCancelFullScreen) document.mozCancelFullScreen()
-    else if (document.webkitsExitFullscreen) document.webkitExitFullscreen()
+  if (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  ) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+    else if (document.webkitsExitFullscreen) document.webkitExitFullscreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
     this._.form.buttons.fullscreen.setAttribute("icon", "fullscreenOn");
   } else {
     var element = this._.element;
-    if (element.requestFullscreen) element.requestFullscreen()
-    else if (element.mozRequestFullScreen) element.mozRequestFullScreen()
-    else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT)
-    else if (element.msRequestFullscreen) element.msRequestFullscreen()
+    if (element.requestFullscreen) element.requestFullscreen();
+    else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
+    else if (element.webkitRequestFullscreen)
+      element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    else if (element.msRequestFullscreen) element.msRequestFullscreen();
     else {
       // For stupid users with iPhone
       element = this._.form.video;
-      if(element.webkitEnterFullscreen) element.webkitEnterFullscreen();
+      if (element.webkitEnterFullscreen) element.webkitEnterFullscreen();
     }
     this._.form.buttons.fullscreen.setAttribute("icon", "fullscreenOff");
   }
@@ -34,7 +41,7 @@ export function generateButtons() {
       },
       (el) => {
         el.onclick = () => {
-          this.playing ? this.pause() : this.play();
+          this._.playing ? this.pause() : this.play();
         };
       }
     ),
@@ -47,7 +54,7 @@ export function generateButtons() {
       },
       (el) => {
         el.onclick = () => {
-          this.rewind(-10);
+          rewind.call(this, -10);
         };
       }
     ),
@@ -60,7 +67,7 @@ export function generateButtons() {
       },
       (el) => {
         el.onclick = () => {
-          this.rewind(10);
+          rewind.call(this, 10);
         };
       }
     ),

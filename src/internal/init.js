@@ -14,10 +14,10 @@ export function init(selector, dataArray) {
     videos: dataArray.videos,
     audios: dataArray.audios,
     subtitles: dataArray.subtitles,
-    playbackSpeed: 1,
+    playbackRate: 1,
     enable_sync: false,
   };
-  this.playing = false;
+  this._.playing = false;
 
   if ((this._.rootElement = document.querySelector(selector))) {
     gui.call(this);
@@ -28,7 +28,7 @@ export function init(selector, dataArray) {
     this.trySync = true;
 
     window.addEventListener("resize", () => {
-      this.resize()
+      this.resize();
     });
   } else logError.call(this, `Can not find "${selector}" element!`);
 }

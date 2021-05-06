@@ -1,5 +1,4 @@
 import { downloadStatusUpdate } from "./playback";
-
 import { logError } from "./utils";
 
 // Надо ждать, пока загрузится страница, а иначе - ошибка
@@ -9,23 +8,23 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 export function setVideo(link) {
-  const currentTime = this._.form.audio.currentTime;
-  const playbackSpeed = this._.playbackSpeed;
+  const currentTime = this.currentTime;
+  const playbackRate = this.playbackRate;
   this._.form.video.mjs_pause();
   this._.form.video.src = link;
   this._.form.video.mjs_setTime(currentTime);
-  this._.form.video.mjs_setRate(playbackSpeed);
-  if (this.playing) this._.form.video.mjs_play();
+  this._.form.video.mjs_setRate(playbackRate);
+  if (this._.playing) this._.form.video.mjs_play();
 }
 
 export function setAudio(link) {
-  const currentTime = this._.form.audio.currentTime;
-  const playbackSpeed = this._.playbackSpeed;
+  const currentTime = this.currentTime;
+  const playbackRate = this.playbackRate;
   this._.form.audio.mjs_pause();
   this._.form.audio.src = link;
   this._.form.audio.currentTime = currentTime;
-  this._.form.audio.playbackSpeed = playbackSpeed;
-  if (this.playing) this._.form.audio.mjs_play();
+  this._.form.audio.playbackRate = playbackRate;
+  if (this._.playing) this._.form.audio.mjs_play();
 }
 
 export function setSubtitles(url) {

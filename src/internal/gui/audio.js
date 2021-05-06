@@ -37,13 +37,11 @@ export function generateAudio() {
 
     // Остальные обработчики событий
     el.onloadedmetadata = () => {
-      this.duration = el.duration;
       this._.form.time.innerText = `${secondsToTime(
-        this._.form.audio.currentTime
+        el.currentTime
       )} / ${secondsToTime(this.duration)}`;
     };
     el.ontimeupdate = () => {
-      this.currentTime = el.currentTime;
       if (!this._.form.progressbar.updateStyle)
         this._.form.progressbar.played.setAttribute(
           "style",
