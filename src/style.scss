@@ -1,6 +1,6 @@
 .mjs {
-  --mjs--accent-color: #0078d7;
-  --mjs--accent-text: white;
+  --mjs--accent-color: #ced4da;
+  --mjs--accent-text: black;
 
   display: block;
 
@@ -50,14 +50,14 @@
     max-width: 300px;
     width: 100%;
     max-height: calc(100% - 64px);
-    background-color: #2b2b2b;
+    background-color: #212529;
     color: white;
-    border: 1px solid #1c1c1c;
+    border: 1px solid #343a40;
 
     .mjs__settingsHeader {
       display: flex;
-      background: white;
-      color: black;
+      background: var(--mjs--accent-color, white);
+      color: var(--mjs--accent-text, black);
       padding: 0px 12px;
       width: 100%;
       line-height: 32px;
@@ -102,16 +102,17 @@
         word-break: break-all;
 
         &:hover {
-          background-color: #404040;
+          background-color: #343a40;
         }
 
         &:active {
-          background-color: #555555;
+          background-color: #495057;
           transform: scale(0.99);
         }
 
         &[selected="true"] {
           background-color: var(--mjs--accent-color, rgba(255, 255, 255, 0.5));
+          color: var(--mjs--accent-text, black);
         }
       }
 
