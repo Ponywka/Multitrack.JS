@@ -2,15 +2,23 @@ import { createElement } from "../utils";
 
 export function generateOverlay() {
   let GUItimeout;
-  this._.element.addEventListener("mousemove", () => {
-    const overlayEl = this._.form.overlays._root;
+
+  function showOverlay(){
     this._.rootElement.classList.remove("mjs__overlay_hidden");
-    overlayEl.removeAttribute("style");
     clearTimeout(GUItimeout);
     GUItimeout = setTimeout(() => {
       this._.rootElement.classList.add("mjs__overlay_hidden");
     }, 3000);
+  }
+
+  this._.element.addEventListener("mousemove", () => {
+    showOverlay.call(this);
   });
+  this._.element.addEventListener("touchmove", () => {
+    showOverlay.call(this);
+  });
+
+
   this._.element.addEventListener("mouseout", () => {
     const overlayEl = this._.form.overlays._root;
     clearTimeout(GUItimeout);
