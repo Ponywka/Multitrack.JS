@@ -144,7 +144,7 @@ export function generateSettings() {
   }
   this._.form.settings.menu.dubs.Buttons[0].click();
 
-  this._.form.settings.menu.subtitles.appendButton("Отключено", () => {
+  this._.form.settings.menu.subtitles.appendButton("Без субтитров", () => {
     setSubtitles.call(this);
   });
   this._.form.settings.menu.subtitles.Buttons[0].click();
