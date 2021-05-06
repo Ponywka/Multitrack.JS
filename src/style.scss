@@ -323,10 +323,6 @@
     transition: 0.3s background;
     cursor: pointer;
 
-    &:hover {
-      background-color: var(--mjs--accent-color, rgba(255, 255, 255, 0.25));
-    }
-
     &[hidden] {
       display: none;
     }
