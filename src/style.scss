@@ -300,6 +300,10 @@
     opacity: 0;
   }
 
+  &.mjs__overlay_hidden {
+    cursor: none;
+  }
+
   &.mjs__settings_show .mjs__overlay {
     opacity: 1;
   }
