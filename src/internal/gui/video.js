@@ -54,7 +54,9 @@ export function generateVideo() {
       el.mjs_setTime = (val) => {
         el.onseeking = null;
         el.currentTime = val;
-        el.onseeking = el._onseeking;
+        setTimeout(() => {
+          el.onseeking = el._onseeking;
+        }, 16);
       };
 
       el._onratechange = () => {
