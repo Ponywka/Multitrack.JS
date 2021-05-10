@@ -78,6 +78,16 @@ export function hotkeys() {
       case "Numpad9":
         this.currentTime = this.duration * 0.9;
         break;
+      case "Comma":
+        rewind.call(this, -(1 / 24));
+        break;
+      case "Period":
+        rewind.call(this, (1 / 24));
+        break;
+      default:
+        if (process.env.NODE_ENV !== "production")
+          console.log(`Key pressed: ${event.code}`);
+        break;
     }
   });
 }
