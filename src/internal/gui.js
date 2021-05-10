@@ -1,8 +1,7 @@
 import { createElement } from "./utils";
 import { hotkeys } from "./gui/hotkeys";
 import { gestures } from "./gui/gestures";
-import { generateVideo } from "./gui/video";
-import { generateAudio } from "./gui/audio";
+import { generateMedia } from "./gui/media";
 import { generateVolume } from "./gui/volume";
 import { generateSettings } from "./gui/settings";
 import { generateProgressbar } from "./gui/progressbar";
@@ -15,8 +14,7 @@ export function gui() {
 
   this._.form = {};
   // Генерация элементов GUI
-  generateVideo.call(this);
-  generateAudio.call(this);
+  generateMedia.call(this);
 
   this._.form.subtitles = createElement("div", { class: "mjs__subtitles" });
   this._.form.time = createElement("div", { class: "mjs__overlay-time" });

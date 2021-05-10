@@ -22,8 +22,8 @@ export function setAudio(link) {
   const playbackRate = this.playbackRate;
   this._.form.audio.mjs_pause();
   this._.form.audio.src = link;
-  this._.form.audio.currentTime = currentTime;
-  this._.form.audio.playbackRate = playbackRate;
+  this._.form.audio.mjs_setTime(currentTime);
+  this._.form.audio.mjs_setRate(playbackRate);
   if (this._.playing) this._.form.audio.mjs_play();
 }
 

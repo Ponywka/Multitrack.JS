@@ -7,7 +7,7 @@ export function synchronize(target = null) {
     const playbackRate = root.playbackRate;
     const diff = video.currentTime - audio.currentTime;
 
-    audio.playbackRate = playbackRate;
+    audio.mjs_setRate(playbackRate);
     video.mjs_setRate(playbackRate);
     if (video.syncTimeout) clearTimeout(video.syncTimeout);
     video.syncTimeout = null;
@@ -88,12 +88,12 @@ export function pause() {
 export function seek(val) {
   val += this.currentTime;
   if (val < 0) val = 0;
-  this._.form.audio.currentTime = val;
+  this._.form.audio.mjs_setTime(val);
   this._.form.video.mjs_setTime(val);
 }
 
 export function setTime(val, isVideo = false) {
-  this._.form.audio.currentTime = val;
+  this._.form.audio.mjs_setTime(val);
   if (!isVideo) this._.form.video.mjs_setTime(val);
 }
 
