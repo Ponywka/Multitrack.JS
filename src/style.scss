@@ -144,9 +144,7 @@
       position: absolute;
       left: 0;
       bottom: 36px;
-      width: -webkit-fill-available;
-      width: -moz-available;
-      width: fill-available;
+      width: calc(100% - 16px);
       height: 16px;
       margin: 0px 8px;
       box-sizing: border-box;

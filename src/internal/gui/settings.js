@@ -32,7 +32,7 @@ class SettingsRadioButtons {
     let btn = createElement("div", { class: "mjs__settings_element" });
     btn.innerText = name;
     btn.onclick = (event) => {
-      for (let el of this.Buttons) el.removeAttribute("selected");
+      this.Buttons.forEach((el) => el.removeAttribute("selected"));
       btn.setAttribute("selected", "true");
       action();
     };
@@ -61,10 +61,12 @@ export function toggleSettings() {
 function resetMenu() {
   this._.form.settings.title.innerText = "Настройки";
   this._.form.settings.header.setAttribute("showIcon", null);
-  for (let el in this._.form.settings.menu) {
-    el = this._.form.settings.menu[el];
-    el.Content.setAttribute("style", "display: none");
-  }
+  Object.keys(this._.form.settings.menu).forEach((key) => {
+    if (!this._.form.settings.menu.hasOwnProperty(key)) return;
+
+    const menu = this._.form.settings.menu[key];
+    menu.Content.setAttribute("style", "display: none");
+  });
   this._.form.settings.menuSwitcher.Content.removeAttribute("style");
 }
 
@@ -130,18 +132,18 @@ export function generateSettings() {
   this._.form.settings._root = createElement("div", { class: "mjs__settings" });
 
   // Append content
-  for (let video of this._.videos) {
+  this._.videos.forEach((video) => {
     this._.form.settings.menu.quality.appendButton(video.name, () => {
       setVideo.call(this, video.path);
     });
-  }
+  })
   this._.form.settings.menu.quality.Buttons[0].click();
 
-  for (let audio of this._.audios) {
+  this._.audios.forEach((audio) => {
     this._.form.settings.menu.dubs.appendButton(audio.name, () => {
       setAudio.call(this, audio.path);
     });
-  }
+  })
   this._.form.settings.menu.dubs.Buttons[0].click();
 
   this._.form.settings.menu.subtitles.appendButton("Без субтитров", () => {
@@ -149,21 +151,23 @@ export function generateSettings() {
   });
   this._.form.settings.menu.subtitles.Buttons[0].click();
 
-  for (let subtitle of this._.subtitles) {
+  this._.subtitles.forEach((subtitle) => {
     this._.form.settings.menu.subtitles.appendButton(subtitle.name, () => {
       setSubtitles.call(this, subtitle.path);
     });
-  }
+  });
 
-  for (let speed of [0.5, 1, 1.5, 2]) {
+  [0.5, 1, 1.5, 2].forEach((speed) => {
     this._.form.settings.menu.playbackRate.appendButton(speed + "x", () => {
       setSpeed.call(this, speed);
     });
-  }
+  });
   this._.form.settings.menu.playbackRate.Buttons[1].click();
 
-  for (let menu in this._.form.settings.menu) {
-    menu = this._.form.settings.menu[menu];
+  Object.keys(this._.form.settings.menu).forEach((key) => {
+    if (!this._.form.settings.menu.hasOwnProperty(key)) return;
+
+    const menu = this._.form.settings.menu[key];
     this._.form.settings.menuSwitcher.appendButton(menu.Name, () => {
       resetMenu.call(this);
       this._.form.settings.header.setAttribute("showIcon", "true");
@@ -174,7 +178,7 @@ export function generateSettings() {
         "display: none;"
       );
     });
-  }
+  });
 
   // AppendMenus
   this._.form.settings.body = createElement("div", {
@@ -183,10 +187,12 @@ export function generateSettings() {
   this._.form.settings.body.appendChild(
     this._.form.settings.menuSwitcher.Content
   );
-  for (let menu in this._.form.settings.menu) {
-    menu = this._.form.settings.menu[menu];
+  Object.keys(this._.form.settings.menu).forEach((key) => {
+    if (!this._.form.settings.menu.hasOwnProperty(key)) return;
+
+    const menu = this._.form.settings.menu[key];
     this._.form.settings.body.appendChild(menu.Content);
-  }
+  });
   resetMenu.call(this);
 
   this._.form.settings.header.appendChild(this._.form.settings.title);

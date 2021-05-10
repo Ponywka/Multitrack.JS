@@ -70,7 +70,7 @@
         });
 
         var diff = document.querySelector("#diff");
-        var diffInterval = setInterval(()=>{
+        var diffInterval = setInterval(function () {
             diff.innerText = "V-A: " + (player._.form.video.currentTime - player._.form.audio.currentTime);
             if(player._.form.video.syncTimeout != null){
                 diff.style = "background-color: black; color: white;";

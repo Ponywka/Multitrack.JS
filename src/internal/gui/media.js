@@ -16,8 +16,8 @@ function appendEvents(element) {
   element.addEventListener("playing", onplaying);
   element.mjs_play = () => {
     element.removeEventListener("playing", onplaying);
-    element
-      .play()
+    const playable = Promise.resolve(element.play());
+    playable
       .then(() => {
         element.addEventListener("playing", onplaying);
       })

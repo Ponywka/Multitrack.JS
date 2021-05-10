@@ -1,7 +1,7 @@
 export function getPosInElement(element, event) {
   return {
-    x: event.clientX - element.getBoundingClientRect().x,
-    y: event.clientY - element.getBoundingClientRect().y,
+    x: event.clientX - element.getBoundingClientRect().left,
+    y: event.clientY - element.getBoundingClientRect().top,
   };
 }
 
@@ -22,7 +22,7 @@ export function secondsToTime(sec) {
 
 export function createElement(tag, params = {}, actions = () => {}) {
   var el = document.createElement(tag);
-  for (var name in params) el.setAttribute(name, params[name]);
+  Object.keys(params).forEach((name) => el.setAttribute(name, params[name]));
   actions(el);
   return el;
 }

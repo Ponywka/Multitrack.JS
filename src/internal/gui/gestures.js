@@ -4,31 +4,31 @@ import { toggleFullscreen } from "../gui/buttons";
 export function gestures() {
   this._.moveEvents = [];
   document.addEventListener("mousemove", (event) => {
-    for (let func of this._.moveEvents) {
+    this._.moveEvents.forEach((func) => {
       func.move(event);
-    }
+    });
   });
   document.addEventListener("mouseup", (event) => {
-    for (let func of this._.moveEvents) {
+    this._.moveEvents.forEach((func) => {
       func.release(event);
-    }
+    });
     this._.moveEvents = [];
   });
   document.addEventListener(
     "touchmove",
     (event) => {
-      for (let func of this._.moveEvents) {
+      this._.moveEvents.forEach((func) => {
         func.move(event.touches[0]);
-      }
+      });
     },
     false
   );
   document.addEventListener(
     "touchend",
     (event) => {
-      for (let func of this._.moveEvents) {
+      this._.moveEvents.forEach((func) => {
         func.release(event.changedTouches[0]);
-      }
+      });
       this._.moveEvents = [];
     },
     false
