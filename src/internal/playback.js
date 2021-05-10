@@ -85,7 +85,7 @@ export function pause() {
   changePlaying.call(this, false);
 }
 
-export function rewind(val) {
+export function seek(val) {
   val += this.currentTime;
   if (val < 0) val = 0;
   this._.form.audio.currentTime = val;

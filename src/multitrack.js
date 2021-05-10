@@ -3,7 +3,7 @@ import { init } from "./internal/init";
 import {
   play,
   pause,
-  rewind,
+  seek,
   setTime,
   synchronize,
   setSpeed,

@@ -1,6 +1,6 @@
 import { setVolume, mute } from "../volume";
 import { toggleFullscreen } from "../gui/buttons";
-import { rewind } from "../playback";
+import { seek } from "../playback";
 
 export function hotkeys() {
   document.addEventListener("keydown", (event) => {
@@ -12,17 +12,17 @@ export function hotkeys() {
         break;
       case "ArrowLeft":
         event.preventDefault();
-        rewind.call(this, -5);
+        seek.call(this, -5);
         break;
       case "ArrowRight":
         event.preventDefault();
-        rewind.call(this, 5);
+        seek.call(this, 5);
         break;
       case "KeyJ":
-        rewind.call(this, -10);
+        seek.call(this, -10);
         break;
       case "KeyL":
-        rewind.call(this, 10);
+        seek.call(this, 10);
         break;
       case "KeyM":
         mute.call(this, true);
@@ -79,10 +79,10 @@ export function hotkeys() {
         this.currentTime = this.duration * 0.9;
         break;
       case "Comma":
-        rewind.call(this, -(1 / 24));
+        seek.call(this, -(1 / 24));
         break;
       case "Period":
-        rewind.call(this, (1 / 24));
+        seek.call(this, (1 / 24));
         break;
       default:
         if (process.env.NODE_ENV !== "production")

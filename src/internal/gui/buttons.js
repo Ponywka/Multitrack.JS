@@ -1,6 +1,6 @@
 import { createElement, logError } from "../utils";
 import { toggleSettings } from "../gui/settings";
-import { rewind } from "../playback";
+import { seek } from "../playback";
 
 export function toggleFullscreen() {
   if (
@@ -54,7 +54,7 @@ export function generateButtons() {
       },
       (el) => {
         el.onclick = () => {
-          rewind.call(this, -10);
+          seek.call(this, -10);
         };
       }
     ),
@@ -67,7 +67,7 @@ export function generateButtons() {
       },
       (el) => {
         el.onclick = () => {
-          rewind.call(this, 10);
+          seek.call(this, 10);
         };
       }
     ),
