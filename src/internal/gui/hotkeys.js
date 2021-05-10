@@ -79,10 +79,10 @@ export function hotkeys() {
         this.currentTime = this.duration * 0.9;
         break;
       case "Comma":
-        seek.call(this, -(1 / 24));
+        if(!this._.playing) seek.call(this, -(1 / 24));
         break;
       case "Period":
-        seek.call(this, (1 / 24));
+        if(!this._.playing) seek.call(this, (1 / 24));
         break;
       default:
         if (process.env.NODE_ENV !== "production")
