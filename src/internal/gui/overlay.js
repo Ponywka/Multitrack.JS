@@ -1,43 +1,41 @@
-import { createElement } from "../utils";
+import { createElement } from '../utils';
 
 export function generateOverlay() {
   let GUItimeout;
 
-  function showOverlay(){
-    this._.rootElement.classList.remove("mjs__overlay_hidden");
+  function showOverlay() {
+    this._.rootElement.classList.remove('mjs__overlay_hidden');
     clearTimeout(GUItimeout);
     GUItimeout = setTimeout(() => {
-      this._.rootElement.classList.add("mjs__overlay_hidden");
+      this._.rootElement.classList.add('mjs__overlay_hidden');
     }, 3000);
   }
 
-  this._.element.addEventListener("mousemove", () => {
+  this._.element.addEventListener('mousemove', () => {
     showOverlay.call(this);
   });
-  this._.element.addEventListener("touchmove", () => {
+  this._.element.addEventListener('touchmove', () => {
     showOverlay.call(this);
   });
 
-
-  this._.element.addEventListener("mouseout", () => {
-    const overlayEl = this._.form.overlays._root;
+  this._.element.addEventListener('mouseout', () => {
     clearTimeout(GUItimeout);
-    this._.rootElement.classList.add("mjs__overlay_hidden");
+    this._.rootElement.classList.add('mjs__overlay_hidden');
   });
 
   this._.form.overlays = {
     _root: createElement(
-      "div",
+      'div',
       {
-        class: "mjs__overlay",
+        class: 'mjs__overlay',
       },
-      (el) => {}
+      () => {},
     ),
-    bottom: createElement("div", {
-      class: "mjs__overlay-bottom",
+    bottom: createElement('div', {
+      class: 'mjs__overlay-bottom',
     }),
-    top: createElement("div", {
-      class: "mjs__overlay-top",
+    top: createElement('div', {
+      class: 'mjs__overlay-top',
     }),
   };
 
@@ -50,11 +48,11 @@ export function generateOverlay() {
   this._.form.overlays.bottom.appendChild(this._.form.volumebar._root);
   this._.form.overlays.bottom.appendChild(this._.form.time);
   this._.form.overlays.bottom.appendChild(
-    createElement("div", {
-      style: "flex: auto",
-    })
+    createElement('div', {
+      style: 'flex: auto',
+    }),
   );
-  if ("pictureInPictureEnabled" in document) {
+  if ('pictureInPictureEnabled' in document) {
     this._.form.overlays.bottom.appendChild(this._.form.buttons.pip);
   }
   this._.form.overlays.bottom.appendChild(this._.form.buttons.menu);
@@ -63,9 +61,13 @@ export function generateOverlay() {
   this._.form.overlays._root.appendChild(this._.form.overlays.top);
   this._.form.overlays._root.appendChild(this._.form.overlays.bottom);
   this._.form.overlays._root.appendChild(this._.form.progressbar._root);
-  this._.form.overlays._root.addEventListener("click", (event) => {
-    if (event.target == this._.form.overlays._root) {
-      this._.playing ? this.pause() : this.play();
+  this._.form.overlays._root.addEventListener('click', (event) => {
+    if (event.target === this._.form.overlays._root) {
+      if (this._.playing) {
+        this.pause();
+      } else {
+        this.play();
+      }
     }
   });
 }

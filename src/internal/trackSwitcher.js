@@ -1,15 +1,15 @@
-import { downloadStatusUpdate } from "./playback";
-import { logError } from "./utils";
+import { logError } from './utils';
 
 // Надо ждать, пока загрузится страница, а иначе - ошибка
 let ASS;
-document.addEventListener("DOMContentLoaded", function () {
-  ASS = require("assjs").default;
+document.addEventListener('DOMContentLoaded', () => {
+  // eslint-disable-next-line global-require
+  ASS = require('assjs').default;
 });
 
 export function setVideo(link) {
-  const currentTime = this.currentTime;
-  const playbackRate = this.playbackRate;
+  const { currentTime } = this;
+  const { playbackRate } = this;
   this._.form.video.mjs_pause();
   this._.form.video.src = link;
   this._.form.video.mjs_setTime(currentTime);
@@ -18,8 +18,8 @@ export function setVideo(link) {
 }
 
 export function setAudio(link) {
-  const currentTime = this.currentTime;
-  const playbackRate = this.playbackRate;
+  const { currentTime } = this;
+  const { playbackRate } = this;
   this._.form.audio.mjs_pause();
   this._.form.audio.src = link;
   this._.form.audio.mjs_setTime(currentTime);
@@ -35,8 +35,8 @@ export function setSubtitles(url) {
   }
   if (url) {
     this._.subtitlesDownloader = setTimeout(() => {
-      let xhr = new XMLHttpRequest();
-      xhr.open("GET", url, false);
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, false);
       xhr.send();
       if (xhr.status === 200) {
         try {

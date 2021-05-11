@@ -1,20 +1,20 @@
-import "./style.scss";
-import { init } from "./internal/init";
+import './style.scss';
+import { init } from './internal/init';
 import {
   play,
   pause,
-  seek,
   setTime,
   synchronize,
   setSpeed,
-} from "./internal/playback";
-import { sleep } from "./internal/utils";
-//import { ASS } from 'assjs'
+} from './internal/playback';
+import { sleep } from './internal/utils';
+// import { ASS } from 'assjs'
 
 export default class {
   get currentTime() {
     return this._.form.audio.currentTime;
   }
+
   set currentTime(val) {
     setTime.call(this, val);
   }
@@ -24,8 +24,8 @@ export default class {
   }
 
   get ended() {
-    const video = this._.form.video;
-    const audio = this._.form.audio;
+    const { video } = this._.form;
+    const { audio } = this._.form;
     return video.ended || audio.ended;
   }
 
@@ -36,18 +36,21 @@ export default class {
   get muted() {
     return this._.form.audio.muted;
   }
+
   set muted(val) {
+    // eslint-disable-next-line eqeqeq
     val = val == true;
-    const audio = this._.form.audio;
+    const { audio } = this._.form;
     audio.muted = val;
     let iconNum = Math.ceil(audio.volume * 3);
     if (val) iconNum = 0;
-    this._.form.buttons.volume.setAttribute("iconVar", iconNum);
+    this._.form.buttons.volume.setAttribute('iconVar', iconNum);
   }
 
   get playbackRate() {
     return this._.playbackRate;
   }
+
   set playbackRate(val) {
     setSpeed.call(this, val);
   }
@@ -55,18 +58,19 @@ export default class {
   get volume() {
     return this._.form.audio.volume;
   }
+
   set volume(value) {
-    if (typeof value === "number") {
+    if (typeof value === 'number') {
       if (value < 0) value = 0;
       if (value > 1) value = 1;
-      const audio = this._.form.audio;
+      const { audio } = this._.form;
       audio.volume = value;
       let iconNum = Math.ceil(audio.volume * 3);
       if (audio.muted) iconNum = 0;
-      this._.form.buttons.volume.setAttribute("iconVar", iconNum);
+      this._.form.buttons.volume.setAttribute('iconVar', iconNum);
       this._.form.volumebar.selected.setAttribute(
-        "style",
-        `width: ${100 * value}%`
+        'style',
+        `width: ${100 * value}%`,
       );
     }
   }
@@ -75,6 +79,7 @@ export default class {
     return this._.enable_sync;
   }
 
+  /* eslint-disable */
   set trySync(val) {
     const root = this;
     if (val == true) val = true;
@@ -93,9 +98,10 @@ export default class {
             await sleep(1000);
           }
         }
-      })();
+      }());
     }
   }
+  /* eslint-enable */
 
   constructor(selector, dataArray) {
     init.call(this, selector, dataArray);

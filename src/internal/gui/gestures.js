@@ -1,54 +1,54 @@
-import { toggleSettings } from "../gui/settings";
-import { toggleFullscreen } from "../gui/buttons";
+import { toggleSettings } from './settings';
+import { toggleFullscreen } from './buttons';
 
 export function gestures() {
   this._.moveEvents = [];
-  document.addEventListener("mousemove", (event) => {
-    for (let func of this._.moveEvents) {
+  document.addEventListener('mousemove', (event) => {
+    this._.moveEvents.forEach((func) => {
       func.move(event);
-    }
+    });
   });
-  document.addEventListener("mouseup", (event) => {
-    for (let func of this._.moveEvents) {
+  document.addEventListener('mouseup', (event) => {
+    this._.moveEvents.forEach((func) => {
       func.release(event);
-    }
+    });
     this._.moveEvents = [];
   });
   document.addEventListener(
-    "touchmove",
+    'touchmove',
     (event) => {
-      for (let func of this._.moveEvents) {
+      this._.moveEvents.forEach((func) => {
         func.move(event.touches[0]);
-      }
+      });
     },
-    false
+    false,
   );
   document.addEventListener(
-    "touchend",
+    'touchend',
     (event) => {
-      for (let func of this._.moveEvents) {
+      this._.moveEvents.forEach((func) => {
         func.release(event.changedTouches[0]);
-      }
+      });
       this._.moveEvents = [];
     },
-    false
+    false,
   );
   this._.form.overlays._root.addEventListener(
-    "dblclick",
+    'dblclick',
     (event) => {
       if (event.target === this._.form.overlays._root) {
         toggleFullscreen.call(this);
       }
     },
-    false
+    false,
   );
   this._.element.addEventListener(
-    "contextmenu",
+    'contextmenu',
     (event) => {
       event.preventDefault();
       toggleSettings.call(this);
       return false;
     },
-    false
+    false,
   );
 }

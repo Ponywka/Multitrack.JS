@@ -1,9 +1,9 @@
-import { gui } from "./gui.js";
-import { logError } from "./utils.js";
+import { gui } from './gui.js';
+import { logError } from './utils.js';
 
 export function init(selector, dataArray) {
   this._ = {
-    name: "Multitrack.JS",
+    name: 'Multitrack.JS',
     parameters: {
       frames: {
         x: 10,
@@ -18,8 +18,8 @@ export function init(selector, dataArray) {
     enable_sync: false,
   };
   this._.playing = false;
-
-  if ((this._.rootElement = document.querySelector(selector))) {
+  this._.rootElement = document.querySelector(selector);
+  if (this._.rootElement) {
     gui.call(this);
 
     if (dataArray.placeholder) this._.form.video.poster = dataArray.placeholder;
@@ -27,7 +27,7 @@ export function init(selector, dataArray) {
     this._.form.title.innerText = dataArray.title;
     this.trySync = true;
 
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       this.resize();
     });
   } else logError.call(this, `Can not find "${selector}" element!`);

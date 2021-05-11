@@ -1,167 +1,153 @@
-import { createElement, getPosInElement, secondsToTime } from "../utils";
+import { createElement, getPosInElement, secondsToTime } from '../utils';
 
 export function generateProgressbar() {
   this._.form.progressbar = {
-    line: createElement("div", {
-      class: "mjs__overlay-progressBar-background",
+    line: createElement('div', {
+      class: 'mjs__overlay-progressBar-background',
     }),
     loaded: createElement(
-      "canvas",
+      'canvas',
       {
-        class: "mjs__overlay-progressBar-loaded",
+        class: 'mjs__overlay-progressBar-loaded',
         height: 1,
       },
       (el) => {
-        el._canvas = el.getContext("2d");
-      }
+        el._canvas = el.getContext('2d');
+      },
     ),
-    played: createElement("div", {
-      class: "mjs__overlay-progressBar-played",
+    played: createElement('div', {
+      class: 'mjs__overlay-progressBar-played',
     }),
     popup: createElement(
-      "div",
+      'div',
       {
-        class: "mjs__overlay-progressPopup",
+        class: 'mjs__overlay-progressPopup',
       },
       (el) => {
-        el.text = createElement("div", {
-          class: "mjs__overlay-progressPopup-time",
+        el.text = createElement('div', {
+          class: 'mjs__overlay-progressPopup-time',
         });
-        el.image = createElement("div", {
-          class: "mjs__overlay-progressPopup-image",
+        el.image = createElement('div', {
+          class: 'mjs__overlay-progressPopup-image',
         });
-      }
+      },
     ),
     _root: createElement(
-      "div",
+      'div',
       {
-        class: "mjs__overlay-progressBar",
+        class: 'mjs__overlay-progressBar',
       },
       (el) => {
-        let updatePopup = (cursorX, position) => {
+        const updatePopup = (cursorX, position) => {
           // Обновление всплывающего пузырька
           this._.form.progressbar.popup.text.innerText = secondsToTime(
-            this.duration * position
+            this.duration * position,
           );
           this._.form.progressbar.popup.classList.add(
-            "mjs__overlay-progressPopup-show"
+            'mjs__overlay-progressPopup-show',
           );
-          if (this._.form.progressbar.popup.clientWidth != 0) {
-            this._.form.progressbar.popup.halfWidth =
-              this._.form.progressbar.popup.clientWidth / 2;
+          if (this._.form.progressbar.popup.clientWidth !== 0) {
+            this._.form.progressbar.popup.halfWidth = this._.form.progressbar.popup.clientWidth / 2;
           }
           if (cursorX < this._.form.progressbar.popup.halfWidth) {
-            this._.form.progressbar.popup.setAttribute("style", `left: 0px`);
+            this._.form.progressbar.popup.setAttribute('style', 'left: 0px');
           } else if (
-            cursorX <
-            el.clientWidth - this._.form.progressbar.popup.halfWidth
+            cursorX
+            < el.clientWidth - this._.form.progressbar.popup.halfWidth
           ) {
             this._.form.progressbar.popup.setAttribute(
-              "style",
-              `left: ${cursorX - this._.form.progressbar.popup.halfWidth}px`
+              'style',
+              `left: ${cursorX - this._.form.progressbar.popup.halfWidth}px`,
             );
           } else {
             this._.form.progressbar.popup.setAttribute(
-              "style",
+              'style',
               `left: ${
                 el.clientWidth - this._.form.progressbar.popup.halfWidth * 2
-              }px`
+              }px`,
             );
           }
           // Отображение нужного тайла на экран
           if (this._.parameters.frames.image) {
-            var framesAll =
-              this._.parameters.frames.x * this._.parameters.frames.y;
-            var frame = Math.floor(position * framesAll);
+            const framesAll = this._.parameters.frames.x * this._.parameters.frames.y;
+            let frame = Math.floor(position * framesAll);
             if (frame >= framesAll) frame = framesAll - 1;
-            var offsetX =
-              (frame % this._.parameters.frames.x) /
-              (this._.parameters.frames.x - 1);
-            var offsetY =
-              Math.floor(frame / this._.parameters.frames.x) /
-              (this._.parameters.frames.y - 1);
-            this._.form.progressbar.popup.image.setAttribute(
-              "style",
-              `
-                            background-position: ${offsetX * 100}% ${
-                offsetY * 100
-              }%;
-                            background-size: ${
-                              this._.parameters.frames.x * 100
-                            }%;
-                            background-image: url(${
-                              this._.parameters.frames.image
-                            })`
-            );
+            const offsetX = (frame % this._.parameters.frames.x)
+              / (this._.parameters.frames.x - 1);
+            const offsetY = Math.floor(frame / this._.parameters.frames.x)
+              / (this._.parameters.frames.y - 1);
+            this._.form.progressbar.popup.image.setAttribute('style', `
+              background-position: ${offsetX * 100}% ${offsetY * 100}%;
+              background-size: ${this._.parameters.frames.x * 100}%;
+              background-image: url(${this._.parameters.frames.image})`);
           } else {
             this._.form.progressbar.popup.image.setAttribute(
-              "style",
-              "display: none"
+              'style',
+              'display: none',
             );
           }
         };
 
-        let move = (event) => {
+        const move = (event) => {
           // Получение координаты и вычисление позиции (от 0 до 1)
-          var cursor = getPosInElement(el, event);
-          var position = cursor.x / el.clientWidth;
+          const cursor = getPosInElement(el, event);
+          let position = cursor.x / el.clientWidth;
           if (position < 0) position = 0;
           if (position > 1) position = 1;
           // Обновление ширины текущей позиции
           if (this._.form.progressbar.updateStyle) {
             this._.form.progressbar.played.setAttribute(
-              "style",
-              `width: ${100 * position}%`
+              'style',
+              `width: ${100 * position}%`,
             );
           }
           updatePopup(cursor.x, position);
         };
-        let release = (event) => {
+        const release = (event) => {
           this._.form.progressbar.updateStyle = false;
           this._.form.progressbar.popup.classList.remove(
-            "mjs__overlay-progressPopup-show"
+            'mjs__overlay-progressPopup-show',
           );
-          this.currentTime =
-            (this.duration * getPosInElement(el, event).x) / el.clientWidth;
+          this.currentTime = (this.duration * getPosInElement(el, event).x) / el.clientWidth;
         };
-        el.addEventListener("mousedown", (event) => {
+        el.addEventListener('mousedown', () => {
           this._.form.progressbar.updateStyle = true;
           Object(this._.moveEvents).push({
-            move: move,
-            release: release,
+            move,
+            release,
           });
         });
-        el.addEventListener("touchstart", (event) => {
+        el.addEventListener('touchstart', () => {
           this._.form.progressbar.updateStyle = true;
           Object(this._.moveEvents).push({
-            move: move,
-            release: release,
+            move,
+            release,
           });
         });
 
-        el.addEventListener("mousemove", (event) => {
-          var cursor = getPosInElement(el, event);
-          var position = cursor.x / el.clientWidth;
+        el.addEventListener('mousemove', (event) => {
+          const cursor = getPosInElement(el, event);
+          let position = cursor.x / el.clientWidth;
           if (position < 0) position = 0;
           if (position > 1) position = 1;
           if (this._.form.progressbar.updateStyle || cursor.y > 0) {
             updatePopup(cursor.x, position);
           } else {
             this._.form.progressbar.popup.classList.remove(
-              "mjs__overlay-progressPopup-show"
+              'mjs__overlay-progressPopup-show',
             );
           }
         });
-        el.addEventListener("mouseout", (event) => {
+        el.addEventListener('mouseout', () => {
           this._.form.progressbar.popup.classList.remove(
-            "mjs__overlay-progressPopup-show"
+            'mjs__overlay-progressPopup-show',
           );
         });
-      }
+      },
     ),
   };
   this._.form.progressbar.popup.appendChild(
-    this._.form.progressbar.popup.image
+    this._.form.progressbar.popup.image,
   );
   this._.form.progressbar.popup.appendChild(this._.form.progressbar.popup.text);
 
