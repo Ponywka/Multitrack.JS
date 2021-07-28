@@ -135,7 +135,12 @@ export function generateSettings() {
       setVideo.call(this, video.path);
     });
   }
-  this._.form.settings.menu.quality.Buttons[0].click();
+  let preferredVideoIndex = 0;
+  if (this._.preferredVideoName) {
+    const index = this._.videos.findIndex((video) => video.name === this._.preferredVideoName);
+    if (index !== -1) preferredVideoIndex = index;
+  }
+  this._.form.settings.menu.quality.Buttons[preferredVideoIndex].click();
 
   for (let audio of this._.audios) {
     this._.form.settings.menu.dubs.appendButton(audio.name, () => {

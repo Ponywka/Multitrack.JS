@@ -14,6 +14,7 @@ export function init(selector, dataArray) {
     videos: dataArray.videos,
     audios: dataArray.audios,
     subtitles: dataArray.subtitles,
+    preferredVideoName: dataArray.preferredVideoName,
     playbackRate: 1,
     enable_sync: false,
   };
